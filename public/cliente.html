@@ -3,16 +3,92 @@
 <head>
     <meta charset="UTF-8" />
     <title>Panel Cliente - Tienda Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 0 20px;
+            margin: 0;
+            padding: 0;
         }
 
-        h1, h2 {
+        header {
+            background-color: #000;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+            header img {
+                width: 50px;
+                height: 50px;
+            }
+
+        .main-header {
+            flex: 1;
             text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .menu {
+            position: relative;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #fff;
+            color: #000;
+            min-width: 200px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 1001;
+        }
+
+            .menu-content a {
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                color: #000;
+                border-bottom: 1px solid #ddd;
+            }
+
+                .menu-content a:hover {
+                    background-color: #f0f0f0;
+                }
+
+        .menu:hover .menu-content {
+            display: block;
+        }
+
+        .content {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .left {
+            flex: 2;
+            margin-right: 20px;
+        }
+
+        .right {
+            flex: 1;
         }
 
         .product {
@@ -34,7 +110,14 @@
             }
 
         .cart {
-            margin-top: 30px;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 6px;
+            position: sticky;
+            top: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
         }
 
             .cart ul {
@@ -47,8 +130,12 @@
                 border-bottom: 1px solid #ccc;
             }
 
+        .highlight {
+            box-shadow: 0 0 10px 2px #28a745;
+        }
+
         #misPedidos {
-            margin-top: 30px;
+            margin: 30px 20px;
             border: 1px solid #ddd;
             padding: 15px;
             background-color: #f8f9fa;
@@ -72,34 +159,100 @@
             font-weight: bold;
             color: #007bff;
         }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+            .close:hover {
+                color: #000;
+            }
     </style>
 </head>
 <body>
+    <header>
+        <img src="logo.png" alt="Logo" />
+        <div class="main-header">Bienvenido a Comercio UTP - Cliente</div>
+        <div class="menu">
+            <button class="menu-button"><i class="fas fa-bars"></i></button>
+            <div class="menu-content">
+                <a href="#" onclick="mostrarModal('categorias')"><i class="fas fa-list"></i> Categorías</a>
+                <a href="#" onclick="mostrarModal('cuponera')"><i class="fas fa-tags"></i> Cuponera de descuento</a>
+                <a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+            </div>
+        </div>
+    </header>
+
     <h1 id="bienvenida">Bienvenido, Cliente</h1>
-    <a href="/logout" style="color: #007bff; display: block; text-align: center; margin-bottom: 20px;">Cerrar sesión</a>
 
-    <section id="productosDisponibles">
-        <h2>Productos disponibles</h2>
-        <div id="listaProductos"></div>
-    </section>
+    <div class="content">
+        <div class="left">
+            <section id="productosDisponibles">
+                <h2>Productos disponibles</h2>
+                <div id="listaProductos"></div>
+            </section>
+        </div>
 
-    <section class="cart">
-        <h2>Carrito de compras</h2>
-        <ul id="cart-items"></ul>
-        <p><strong>Total:</strong> $<span id="cart-total">0.00</span></p>
-        <button onclick="checkout()">Finalizar compra</button>
-    </section>
+        <div class="right">
+            <section class="cart" id="carrito">
+                <h2>Carrito de compras</h2>
+                <ul id="cart-items"></ul>
+                <p><strong>Total:</strong> $<span id="cart-total">0.00</span></p>
+                <button onclick="checkout()">Finalizar compra</button>
+            </section>
+        </div>
+    </div>
 
     <section id="misPedidos">
         <h2>Mis pedidos realizados</h2>
         <ul id="listaPedidos"></ul>
     </section>
 
+    <!-- Modal reutilizable -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
 
-        // Obtener nombre del cliente desde la sesión
         fetch('/session-info')
             .then(res => res.json())
             .then(data => {
@@ -117,6 +270,7 @@
         const cartList = document.getElementById('cart-items');
         const cartTotal = document.getElementById('cart-total');
         const listaPedidos = document.getElementById('listaPedidos');
+        const carrito = document.getElementById('carrito');
 
         socket.on('productosActualizados', (productosActualizados) => {
             productos = productosActualizados;
@@ -134,11 +288,11 @@
                 const div = document.createElement('div');
                 div.classList.add('product');
                 div.innerHTML = `
-                            <h3>${p.nombre}</h3>
-                            <p>${p.descripcion}</p>
-                            <p>Precio: $${p.precio.toFixed(2)}</p>
-                            <button onclick="addToCart(${index})">Agregar al carrito</button>
-                        `;
+              <h3>${p.nombre}</h3>
+              <p>${p.descripcion}</p>
+              <p>Precio: $${p.precio.toFixed(2)}</p>
+              <button onclick="addToCart(${index})">Agregar al carrito</button>
+            `;
                 listaProductos.appendChild(div);
             });
         }
@@ -146,6 +300,9 @@
         function addToCart(index) {
             cartItems.push(productos[index]);
             updateCart();
+            carrito.classList.add('highlight');
+            carrito.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => carrito.classList.remove('highlight'), 1000);
         }
 
         function updateCart() {
@@ -182,7 +339,6 @@
         }
 
         function renderPedidos() {
-            // Mostrar solo pedidos realizados por este cliente (filtrados por nombre en el backend)
             listaPedidos.innerHTML = '';
             if (pedidos.length === 0) {
                 listaPedidos.innerHTML = '<li>No has realizado pedidos aún.</li>';
@@ -192,14 +348,34 @@
             pedidos.forEach((pedido, idx) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                            <strong>Pedido #${idx + 1}</strong><br/>
-                            Productos: ${pedido.productos.map(p => p.nombre).join(', ')}<br/>
-                            Total: $${pedido.total.toFixed(2)}<br/>
-                            Estado: <span class="estado">${pedido.estado}</span>
-                        `;
+              <strong>Pedido #${idx + 1}</strong><br/>
+              Productos: ${pedido.productos.map(p => p.nombre).join(', ')}<br/>
+              Total: $${pedido.total.toFixed(2)}<br/>
+              Estado: <span class="estado">${pedido.estado}</span>
+            `;
                 listaPedidos.appendChild(li);
             });
         }
+
+        function mostrarModal(tipo) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modal-body');
+            if (tipo === 'categorias') {
+                modalBody.innerHTML = '<h3>Categorías</h3><p>Aquí van las categorías disponibles (Ejemplo).</p>';
+            } else if (tipo === 'cuponera') {
+                modalBody.innerHTML = '<h3>Cuponera de descuento</h3><p>Descuentos activos: 10% en toda la tienda (Ejemplo).</p>';
+            }
+            modal.style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) cerrarModal();
+        };
     </script>
 </body>
 </html>
