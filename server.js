@@ -11,7 +11,6 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-// Lista de usuarios (simulada)
 const users = [
     { username: 'admin', password: 'admin123', role: 'admin', fullname: 'Administrador Principal' },
     { username: 'cliente', password: 'cliente123', role: 'client', fullname: 'Cliente Ejemplo' },
@@ -95,7 +94,6 @@ function authRole(role) {
     };
 }
 
-// Rutas protegidas
 app.get('/admin.html', authRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
@@ -110,7 +108,6 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Socket.IO
 io.on('connection', (socket) => {
     console.log('Usuario conectado:', socket.id);
 
