@@ -11,16 +11,17 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
+
 const users = [
     { username: 'admin', password: 'admin123', role: 'admin', fullname: 'Administrador Principal' },
     { username: 'cliente', password: 'cliente123', role: 'client', fullname: 'Cliente Ejemplo' },
 ];
 
-// Datos en memoria
+
 let productos = [];
 let pedidos = [];
 
-// Configurar sesión
+
 const sessionMiddleware = session({
     secret: 'mi_secreto_super_seguro',
     resave: false,
@@ -31,15 +32,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);
 
-// Servir archivos estáticos
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Compartir sesión con Socket.IO
+
 io.use(sharedSession(sessionMiddleware, {
     autoSave: true
 }));
 
-// Registro (simulado)
+
 app.post('/register', (req, res) => {
     const { username, password, fullname } = req.body;
 
@@ -53,7 +54,7 @@ app.post('/register', (req, res) => {
     res.json({ message: 'Registro exitoso, ya puede iniciar sesión' });
 });
 
-// Login
+
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const user = users.find(u => u.username === username && u.password === password);
@@ -70,7 +71,7 @@ app.post('/login', (req, res) => {
     }
 });
 
-// Ruta para obtener información de sesión (nombre, usuario, rol)
+
 app.get('/session-info', (req, res) => {
     if (req.session.user) {
         res.json({
@@ -83,7 +84,7 @@ app.get('/session-info', (req, res) => {
     }
 });
 
-// Middleware por rol
+
 function authRole(role) {
     return (req, res, next) => {
         if (req.session.user && req.session.user.role === role) {
@@ -93,6 +94,7 @@ function authRole(role) {
         }
     };
 }
+
 
 app.get('/admin.html', authRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
@@ -107,6 +109,7 @@ app.get('/logout', (req, res) => {
         res.redirect('/login.html');
     });
 });
+
 
 io.on('connection', (socket) => {
     console.log('Usuario conectado:', socket.id);
@@ -145,5 +148,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Servidor escuchando en puerto ${PORT}`);
+    console.log(Servidor escuchando en puerto ${ PORT });
 });
