@@ -148,5 +148,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(Servidor escuchando en puerto ${ PORT });
+    console.log(`Servidor escuchando en puerto ${PORT}`);
 });
