@@ -43,8 +43,8 @@ const usuariosPendientes = {};
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'tucorreo@gmail.com',           // ← Cambia aquí tu correo
-        pass: 'contraseña-de-aplicación'      // ← Cambia aquí la contraseña de aplicación
+        user: 'pepitoakcachofa20@gmail.com',           // ← Cambia aquí tu correo
+        pass: 'contraseña-de-aplyczagazesppihdjnicación'      // ← Cambia aquí la contraseña de aplicación
     }
 });
 
