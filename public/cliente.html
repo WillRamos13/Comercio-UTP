@@ -363,7 +363,13 @@
 
         <div class="right">
             <section class="cart" id="carrito">
-                <h2>Carrito de compras</h2>
+                <h2>
+                    Carrito de compras
+                    <button id="cerrarCarrito" aria-label="Cerrar carrito"
+                            style="background:none; border:none; font-weight:bold; font-size:18px; float:right; cursor:pointer;">
+                        &times;
+                    </button>
+                </h2>
                 <ul id="cart-items"></ul>
                 <p><strong>Total:</strong> $<span id="cart-total">0.00</span></p>
                 <button onclick="checkout()">Finalizar compra</button>
@@ -412,6 +418,20 @@
         const searchInput = document.getElementById('search-input');
         const btnFiltros = document.getElementById('btn-filtros');
         const dropdownFiltros = document.getElementById('dropdown-filtros');
+
+        const btnCerrarCarrito = document.getElementById('cerrarCarrito');
+
+        // Inicialmente el carrito está visible
+        carrito.style.display = 'block';
+
+        // Evento para cerrar/mostrar el carrito con el botón "X"
+        btnCerrarCarrito.addEventListener('click', () => {
+            if (carrito.style.display === 'none' || carrito.style.display === '') {
+                carrito.style.display = 'block';
+            } else {
+                carrito.style.display = 'none';
+            }
+        });
 
         // Toggle búsqueda activa
         btnLupa.addEventListener('click', () => {
@@ -504,15 +524,15 @@
                 const div = document.createElement('div');
                 div.classList.add('product');
                 div.innerHTML = `
-                  <h3>${p.nombre}</h3>
-                  <p>${p.descripcion}</p>
-                  <p><strong>Categoría:</strong> ${p.categoria}</p>
-                  <p><strong>Color:</strong> ${p.color}</p>
-                  <p><strong>Marca:</strong> ${p.marca}</p>
-                  <p><strong>Precio:</strong> $${p.precio.toFixed(2)}</p>
-                  <p><strong>Disponibilidad:</strong> ${p.disponible ? 'Disponible' : 'No disponible'}</p>
-                  <button onclick="addToCart(${productos.indexOf(p)})">Agregar al carrito</button>
-                `;
+                      <h3>${p.nombre}</h3>
+                      <p>${p.descripcion}</p>
+                      <p><strong>Categoría:</strong> ${p.categoria}</p>
+                      <p><strong>Color:</strong> ${p.color}</p>
+                      <p><strong>Marca:</strong> ${p.marca}</p>
+                      <p><strong>Precio:</strong> $${p.precio.toFixed(2)}</p>
+                      <p><strong>Disponibilidad:</strong> ${p.disponible ? 'Disponible' : 'No disponible'}</p>
+                      <button onclick="addToCart(${productos.indexOf(p)})">Agregar al carrito</button>
+                    `;
                 listaProductos.appendChild(div);
             });
         }
@@ -521,6 +541,7 @@
             cartItems.push(productos[index]);
             updateCart();
             carrito.classList.add('highlight');
+            carrito.style.display = 'block';  // Mostrar carrito al agregar producto
             carrito.scrollIntoView({ behavior: 'smooth' });
             setTimeout(() => carrito.classList.remove('highlight'), 1000);
         }
@@ -542,14 +563,12 @@
                 alert('El carrito está vacío.');
                 return;
             }
-            const total = cartItems.reduce((sum, p) => sum + p.precio, 0);
-            const pedido = {
-                productos: [...cartItems],
-                total: total,
-                estado: 'Procesando'
-            };
-            socket.emit('nuevoPedido', pedido);
-            alert('Compra realizada con éxito. Gracias por su pedido.');
+
+            // Emitir evento para registrar pedido
+            socket.emit('nuevoPedido', cartItems);
+
+            alert('Pedido realizado con éxito');
+
             cartItems.length = 0;
             updateCart();
         }
@@ -557,51 +576,32 @@
         function renderPedidos() {
             listaPedidos.innerHTML = '';
             if (pedidos.length === 0) {
-                listaPedidos.innerHTML = '<li>No has realizado pedidos aún.</li>';
+                listaPedidos.innerHTML = '<li>No tienes pedidos realizados.</li>';
                 return;
             }
-            pedidos.forEach((pedido, idx) => {
+            pedidos.forEach(pedido => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                  <strong>Pedido #${idx + 1}</strong><br/>
-                  Productos: ${pedido.productos.map(p => p.nombre).join(', ')}<br/>
-                  Total: $${pedido.total.toFixed(2)}<br/>
-                  Estado: <span class="estado">${pedido.estado}</span>
-                `;
+                      <strong>Pedido #${pedido.id}</strong> - Estado: <span class="estado">${pedido.estado}</span><br>
+                      Productos:
+                      <ul>
+                        ${pedido.productos.map(prod => `<li>${prod.nombre} - $${prod.precio.toFixed(2)}</li>`).join('')}
+                      </ul>
+                    `;
                 listaPedidos.appendChild(li);
             });
         }
 
+        // Modal genérico
         function mostrarModal(tipo) {
             const modal = document.getElementById('modal');
             const modalBody = document.getElementById('modal-body');
-
+            modalBody.innerHTML = '';
             if (tipo === 'categorias') {
-                modalBody.innerHTML = `
-                    <h3 style= "text-align:center;">Categorías</h3>
-                    <div class="catalogo-categorias">
-                        <div class="card-categoria" onclick="filtrarCategoria('Laptops')">
-                            <i class="fas fa-laptop-code fa-2x"></i>
-                            <span>Laptops</span>
-                        </div>
-                        <div class="card-categoria" onclick="filtrarCategoria('Celulares')">
-                            <i class="fas fa-mobile-alt fa-2x"></i>
-                            <span>Celulares</span>
-                        </div>
-                        <div class="card-categoria" onclick="filtrarCategoria('Perifericos')">
-                            <i class="fas fa-keyboard fa-2x"></i>
-                            <span>Periféricos</span>
-                        </div>
-                        <div class="card-categoria" onclick="filtrarCategoria('PCs')">
-                            <i class="fas fa-desktop fa-2x"></i>
-                            <span>PCs</span>
-                        </div>
-                    </div>
-                `;
+                modalBody.innerHTML = '<h3 id="modalTitle">Categorías</h3><p>Laptops, Celulares, Periféricos, PCs, etc.</p>';
             } else if (tipo === 'cuponera') {
-                modalBody.innerHTML = `<h3 style="text-align:center;">Cuponera de descuento</h3><p>Próximamente...</p>`;
+                modalBody.innerHTML = '<h3 id="modalTitle">Cuponera de Descuento</h3><p>Aquí puedes agregar tus cupones.</p>';
             }
-
             modal.style.display = 'block';
         }
 
@@ -609,17 +609,16 @@
             document.getElementById('modal').style.display = 'none';
         }
 
-        // Filtrar rápido al seleccionar categoría del modal
-        function filtrarCategoria(categoria) {
-            document.getElementById('filter-categoria').value = categoria;
-            aplicarFiltros();
-            cerrarModal();
-        }
-
         window.onclick = function (event) {
             const modal = document.getElementById('modal');
-            if (event.target === modal) cerrarModal();
+            if (event.target === modal) {
+                cerrarModal();
+            }
         };
+
+        // Pedir productos y pedidos iniciales
+        socket.emit('pedirProductos');
+        socket.emit('pedirPedidos');
     </script>
 </body>
 </html>
