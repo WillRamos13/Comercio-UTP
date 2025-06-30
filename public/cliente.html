@@ -5,13 +5,29 @@
     <title>Panel Cliente - Tienda Online</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            flex: 1;
+            font-family: Arial, sans-serif;
             background: #fff;
             color: #000;
         }
+
+        .content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+
 
         header {
             background-color: #000;
@@ -296,6 +312,51 @@
                 #cart-panel button.checkout-btn:hover {
                     background-color: #444;
                 }
+
+        /* Footer con tres columnas */
+        footer {
+            background: #000;
+            color: #fff;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: center; /* Centra horizontalmente */
+            text-align: center; /* Centra el contenido dentro de cada columna */
+            user-select: none;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+
+        .footer-column {
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centra el contenido de cada columna */
+        }
+
+
+        footer h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 6px;
+        }
+
+        footer a {
+            color: #0af;
+            text-decoration: none;
+        }
+
+            footer a:hover {
+                text-decoration: underline;
+            }
+
+        footer p.italic {
+            font-style: italic;
+            margin-top: 0;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -366,7 +427,6 @@
         </div>
     </header>
 
-    <h1 id="bienvenida">Bienvenido, Cliente</h1>
 
     <div class="content">
         <div class="left">
@@ -410,6 +470,29 @@
         <p class="total">Total: $<span id="cart-total">0.00</span></p>
         <button class="checkout-btn" id="checkout-btn">Finalizar compra</button>
     </div>
+
+    <!-- Footer con 3 columnas -->
+    <footer>
+        <div class="footer-column">
+            <h4>Contacto</h4>
+            <p>📞 +51 987 654 321</p>
+            <p>📧 <a href="mailto:contacto@comercioUTP.com">contacto@comercioUTP.com</a></p>
+        </div>
+        <div class="footer-column">
+            <h4>Frase</h4>
+            <p class="italic">“Conectando tecnología y oportunidades para tu futuro universitario.”</p>
+        </div>
+        <div class="footer-column">
+            <h4>Síguenos</h4>
+            <p style="display: flex; gap: 10px;">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook fa-2x"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram fa-2x"></i></a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter fa-2x"></i></a>
+            </p>
+        </div>
+
+    </footer>
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -510,25 +593,42 @@
             renderPedidos();
         });
 
+        // Inicializamos con fetch
+        fetch('/productos')
+            .then(res => res.json())
+            .then(data => {
+                productos = data;
+                aplicarFiltros();
+            });
+
+        fetch('/pedidos')
+            .then(res => res.json())
+            .then(data => {
+                pedidos = data;
+                renderPedidos();
+            });
+
         function aplicarFiltros() {
-            const textoBusqueda = searchInput.value.toLowerCase();
-            const categoriaFiltro = document.getElementById('filter-categoria').value;
-            const colorFiltro = document.getElementById('filter-color').value;
-            const marcaFiltro = document.getElementById('filter-marca').value;
-            const disponibleFiltro = document.getElementById('filter-disponible').value;
+            const texto = searchInput.value.trim().toLowerCase();
+            const categoria = document.getElementById('filter-categoria').value;
+            const color = document.getElementById('filter-color').value;
+            const marca = document.getElementById('filter-marca').value;
+            const disponible = document.getElementById('filter-disponible').value;
             const precioMin = parseFloat(document.getElementById('filter-precio-min').value);
             const precioMax = parseFloat(document.getElementById('filter-precio-max').value);
 
             productosFiltrados = productos.filter(p => {
-                const textoMatch = p.nombre.toLowerCase().includes(textoBusqueda) || p.descripcion.toLowerCase().includes(textoBusqueda);
-                const categoriaMatch = categoriaFiltro ? p.categoria === categoriaFiltro : true;
-                const colorMatch = colorFiltro ? p.color === colorFiltro : true;
-                const marcaMatch = marcaFiltro ? p.marca === marcaFiltro : true;
-                const disponibleMatch = disponibleFiltro ? String(p.disponible) === disponibleFiltro : true;
-                const precioMinMatch = !isNaN(precioMin) ? p.precio >= precioMin : true;
-                const precioMaxMatch = !isNaN(precioMax) ? p.precio <= precioMax : true;
-
-                return textoMatch && categoriaMatch && colorMatch && marcaMatch && disponibleMatch && precioMinMatch && precioMaxMatch;
+                if (texto && !p.nombre.toLowerCase().includes(texto)) return false;
+                if (categoria && p.categoria !== categoria) return false;
+                if (color && p.color !== color) return false;
+                if (marca && p.marca !== marca) return false;
+                if (disponible) {
+                    const dispBool = disponible === "true";
+                    if (p.disponible !== dispBool) return false;
+                }
+                if (!isNaN(precioMin) && p.precio < precioMin) return false;
+                if (!isNaN(precioMax) && p.precio > precioMax) return false;
+                return true;
             });
 
             renderProductos();
@@ -536,55 +636,52 @@
 
         function renderProductos() {
             listaProductos.innerHTML = '';
+
             if (productosFiltrados.length === 0) {
-                listaProductos.innerHTML = '<p>No se encontraron productos que coincidan con los filtros.</p>';
+                listaProductos.textContent = 'No hay productos que coincidan con los filtros.';
                 return;
             }
 
-            productosFiltrados.forEach((p, index) => {
+            productosFiltrados.forEach(p => {
                 const div = document.createElement('div');
                 div.classList.add('product');
                 div.innerHTML = `
-                        <h3>${p.nombre}</h3>
-                        <p>${p.descripcion}</p>
-                        <p><strong>Categoría:</strong> ${p.categoria}</p>
-                        <p><strong>Color:</strong> ${p.color}</p>
-                        <p><strong>Marca:</strong> ${p.marca}</p>
-                        <p><strong>Precio:</strong> $${p.precio.toFixed(2)}</p>
-                        <p><strong>Disponibilidad:</strong> ${p.disponible ? 'Disponible' : 'No disponible'}</p>
-                        <button onclick="addToCart(${productos.indexOf(p)})">Agregar al carrito</button>
-                    `;
+                            <strong>${p.nombre}</strong><br/>
+                            Precio: $${p.precio.toFixed(2)}<br/>
+                            <button onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>
+                        `;
                 listaProductos.appendChild(div);
             });
         }
 
-        function addToCart(index) {
-            cartItems.push(productos[index]);
-            updateCart();
-            // Mostrar panel carrito cuando se agrega producto
-            cartPanel.style.display = 'flex';
-            cartPanel.focus();
+        function agregarAlCarrito(id) {
+            const producto = productos.find(p => p.id === id);
+            if (!producto) return;
+
+            const itemExistente = cartItems.find(item => item.id === id);
+            if (itemExistente) {
+                itemExistente.cantidad++;
+            } else {
+                cartItems.push({ ...producto, cantidad: 1 });
+            }
+            actualizarCarritoUI();
         }
 
-        function updateCart() {
+        function actualizarCarritoUI() {
+            // Actualiza contador
+            const cantidadTotal = cartItems.reduce((acc, item) => acc + item.cantidad, 0);
+            cartCount.textContent = cantidadTotal;
+
+            // Actualiza lista en panel
             cartList.innerHTML = '';
-            let total = 0;
             cartItems.forEach(item => {
                 const li = document.createElement('li');
-                li.textContent = `${item.nombre} - $${item.precio.toFixed(2)}`;
+                li.textContent = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toFixed(2)}`;
                 cartList.appendChild(li);
-                total += item.precio;
             });
-            cartTotal.textContent = total.toFixed(2);
 
-            // Actualizar contador en botón
-            cartCount.textContent = cartItems.length;
-            if (cartItems.length === 0) {
-                cartCount.style.display = 'none';
-                cartPanel.style.display = 'none'; // Ocultar panel si no hay items
-            } else {
-                cartCount.style.display = 'inline-block';
-            }
+            const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+            cartTotal.textContent = total.toFixed(2);
         }
 
         checkoutBtn.addEventListener('click', () => {
@@ -592,42 +689,49 @@
                 alert('El carrito está vacío.');
                 return;
             }
-
-            socket.emit('nuevoPedido', cartItems);
-            alert('Pedido realizado con éxito');
-
-            cartItems.length = 0;
-            updateCart();
+            // Enviar pedido al servidor
+            fetch('/crear-pedido', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: cartItems })
+            }).then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Pedido creado con éxito.');
+                        cartItems.length = 0;
+                        actualizarCarritoUI();
+                        cartPanel.style.display = 'none';
+                        // Actualizamos pedidos
+                        pedidos.push(data.pedido);
+                        renderPedidos();
+                    } else {
+                        alert('Error al crear pedido.');
+                    }
+                })
+                .catch(() => alert('Error al crear pedido.'));
         });
 
         function renderPedidos() {
             listaPedidos.innerHTML = '';
             if (pedidos.length === 0) {
-                listaPedidos.innerHTML = '<li>No tienes pedidos realizados.</li>';
+                listaPedidos.textContent = 'No tienes pedidos realizados.';
                 return;
             }
             pedidos.forEach(pedido => {
                 const li = document.createElement('li');
-                li.innerHTML = `
-                        <strong>Pedido #${pedido.id}</strong> - Estado: <span class="estado">${pedido.estado}</span><br>
-                        Productos:
-                        <ul>
-                            ${pedido.productos.map(prod => `<li>${prod.nombre} - $${prod.precio.toFixed(2)}</li>`).join('')}
-                        </ul>
-                    `;
+                li.textContent = `Pedido #${pedido.id} - ${pedido.fecha} - Total: $${pedido.total.toFixed(2)}`;
                 listaPedidos.appendChild(li);
             });
         }
 
-        // Modal genérico
+        // Modal reutilizable (ejemplo simple)
         function mostrarModal(tipo) {
             const modal = document.getElementById('modal');
             const modalBody = document.getElementById('modal-body');
-            modalBody.innerHTML = '';
             if (tipo === 'categorias') {
-                modalBody.innerHTML = '<h3 id="modalTitle">Categorías</h3><p>Laptops, Celulares, Periféricos, PCs, etc.</p>';
+                modalBody.innerHTML = '<h3>Categorías disponibles</h3><ul><li>Laptops</li><li>Celulares</li><li>Periféricos</li><li>PCs</li></ul>';
             } else if (tipo === 'cuponera') {
-                modalBody.innerHTML = '<h3 id="modalTitle">Cuponera de Descuento</h3><p>Aquí puedes agregar tus cupones.</p>';
+                modalBody.innerHTML = '<h3>Cupones de descuento</h3><p>No hay cupones disponibles actualmente.</p>';
             }
             modal.style.display = 'block';
         }
@@ -641,11 +745,7 @@
             if (event.target === modal) {
                 cerrarModal();
             }
-        };
-
-        // Pedir productos y pedidos iniciales
-        socket.emit('pedirProductos');
-        socket.emit('pedirPedidos');
+        }
     </script>
 </body>
 </html>
