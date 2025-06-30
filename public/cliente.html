@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <title>Panel Cliente - Tienda Online</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background: #fff;
+            color: #000;
         }
 
         header {
@@ -23,7 +25,7 @@
             z-index: 1000;
         }
 
-            header img {
+            header img, header video {
                 width: 50px;
                 height: 50px;
             }
@@ -98,15 +100,16 @@
 
         button {
             padding: 0.5rem 1rem;
-            background-color: #28a745;
+            background-color: #000;
             border: none;
             color: white;
             cursor: pointer;
             border-radius: 4px;
+            transition: background-color 0.3s;
         }
 
             button:hover {
-                background-color: #218838;
+                background-color: #444;
             }
 
         .cart {
@@ -118,6 +121,7 @@
             max-height: 400px;
             overflow-y: auto;
             transition: all 0.3s ease;
+            color: #000;
         }
 
             .cart ul {
@@ -131,7 +135,7 @@
             }
 
         .highlight {
-            box-shadow: 0 0 10px 2px #28a745;
+            box-shadow: 0 0 10px 2px #000;
         }
 
         #misPedidos {
@@ -139,6 +143,7 @@
             border: 1px solid #ddd;
             padding: 15px;
             background-color: #f8f9fa;
+            color: #000;
         }
 
             #misPedidos ul {
@@ -157,14 +162,14 @@
 
         .estado {
             font-weight: bold;
-            color: #007bff;
+            color: #000;
         }
 
         h1 {
             text-align: center;
             margin-top: 20px;
+            color: #000;
         }
-
         /* Modal */
         .modal {
             display: none;
@@ -186,6 +191,7 @@
             max-width: 500px;
             border-radius: 8px;
             position: relative;
+            color: #000;
         }
 
         .close {
@@ -200,15 +206,17 @@
             .close:hover {
                 color: #000;
             }
+
         .catalogo-categorias {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 15px;
             padding: 10px;
             text-align: center;
+            color: #000;
         }
 
-        .card-categoria{
+        .card-categoria {
             background-color: #f8f8f8;
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -220,21 +228,47 @@
             align-items: center;
         }
 
-        .card-categoria:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .card-categoria i {
-            margin-bottom: 8px;
-            color: #007bff;
+            .card-categoria:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+
+            .card-categoria i {
+                margin-bottom: 8px;
+                color: #000;
+            }
+        /* Buscador y filtros */
+        #search-container {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            color: #000;
         }
 
-        
+        #search-input {
+            flex: 2;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #000;
+        }
+
+        select, input[type=number] {
+            flex: 1;
+            padding: 6px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #000;
+            background: #fff;
+            color: #000;
+        }
     </style>
 </head>
 <body>
     <header>
-        <video src="logo.mp4" width="50" autoplay muted loop></video>
+        <video src="logo.mp4" autoplay muted loop></video>
         <div class="main-header">Bienvenido a Comercio UTP - Cliente</div>
         <div class="menu">
             <button class="menu-button"><i class="fas fa-bars"></i></button>
@@ -250,6 +284,45 @@
 
     <div class="content">
         <div class="left">
+            <!-- Filtros y búsqueda -->
+            <div id="search-container">
+                <input type="text" id="search-input" placeholder="Buscar productos..." oninput="aplicarFiltros()" />
+
+                <select id="filter-categoria" onchange="aplicarFiltros()">
+                    <option value="">Todas categorías</option>
+                    <option value="Laptops">Laptops</option>
+                    <option value="Celulares">Celulares</option>
+                    <option value="Perifericos">Periféricos</option>
+                    <option value="PCs">PCs</option>
+                </select>
+
+                <select id="filter-color" onchange="aplicarFiltros()">
+                    <option value="">Todos colores</option>
+                    <option value="Negro">Negro</option>
+                    <option value="Blanco">Blanco</option>
+                    <option value="Rojo">Rojo</option>
+                    <option value="Azul">Azul</option>
+                    <option value="Gris">Gris</option>
+                </select>
+
+                <select id="filter-marca" onchange="aplicarFiltros()">
+                    <option value="">Todas marcas</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Samsung">Samsung</option>
+                    <option value="Dell">Dell</option>
+                    <option value="HP">HP</option>
+                </select>
+
+                <select id="filter-disponible" onchange="aplicarFiltros()">
+                    <option value="">Disponibilidad</option>
+                    <option value="true">Disponible</option>
+                    <option value="false">No disponible</option>
+                </select>
+
+                <input type="number" id="filter-precio-min" placeholder="Precio min." min="0" oninput="aplicarFiltros()" />
+                <input type="number" id="filter-precio-max" placeholder="Precio max." min="0" oninput="aplicarFiltros()" />
+            </div>
+
             <section id="productosDisponibles">
                 <h2>Productos disponibles</h2>
                 <div id="listaProductos"></div>
@@ -293,6 +366,7 @@
             .catch(err => console.error('Error al obtener la sesión:', err));
 
         let productos = [];
+        let productosFiltrados = [];
         const cartItems = [];
         let pedidos = [];
 
@@ -304,7 +378,7 @@
 
         socket.on('productosActualizados', (productosActualizados) => {
             productos = productosActualizados;
-            renderProductos();
+            aplicarFiltros(); // Renderizamos con filtros cada vez que llegan productos nuevos
         });
 
         socket.on('pedidosActualizados', (pedidosActualizados) => {
@@ -312,17 +386,61 @@
             renderPedidos();
         });
 
+        function aplicarFiltros() {
+            const textoBusqueda = document.getElementById('search-input').value.toLowerCase();
+            const categoriaFiltro = document.getElementById('filter-categoria').value;
+            const colorFiltro = document.getElementById('filter-color').value;
+            const marcaFiltro = document.getElementById('filter-marca').value;
+            const disponibleFiltro = document.getElementById('filter-disponible').value;
+            const precioMin = parseFloat(document.getElementById('filter-precio-min').value);
+            const precioMax = parseFloat(document.getElementById('filter-precio-max').value);
+
+            productosFiltrados = productos.filter(p => {
+                // Buscar texto en nombre o descripción
+                const textoMatch = p.nombre.toLowerCase().includes(textoBusqueda) || p.descripcion.toLowerCase().includes(textoBusqueda);
+
+                // Filtrar por categoría
+                const categoriaMatch = categoriaFiltro ? p.categoria === categoriaFiltro : true;
+
+                // Filtrar por color
+                const colorMatch = colorFiltro ? p.color === colorFiltro : true;
+
+                // Filtrar por marca
+                const marcaMatch = marcaFiltro ? p.marca === marcaFiltro : true;
+
+                // Filtrar por disponibilidad
+                const disponibleMatch = disponibleFiltro ? String(p.disponible) === disponibleFiltro : true;
+
+                // Filtrar por precio
+                const precioMinMatch = !isNaN(precioMin) ? p.precio >= precioMin : true;
+                const precioMaxMatch = !isNaN(precioMax) ? p.precio <= precioMax : true;
+
+                return textoMatch && categoriaMatch && colorMatch && marcaMatch && disponibleMatch && precioMinMatch && precioMaxMatch;
+            });
+
+            renderProductos();
+        }
+
         function renderProductos() {
             listaProductos.innerHTML = '';
-            productos.forEach((p, index) => {
+            if (productosFiltrados.length === 0) {
+                listaProductos.innerHTML = '<p>No se encontraron productos que coincidan con los filtros.</p>';
+                return;
+            }
+
+            productosFiltrados.forEach((p, index) => {
                 const div = document.createElement('div');
                 div.classList.add('product');
                 div.innerHTML = `
-              <h3>${p.nombre}</h3>
-              <p>${p.descripcion}</p>
-              <p>Precio: $${p.precio.toFixed(2)}</p>
-              <button onclick="addToCart(${index})">Agregar al carrito</button>
-            `;
+                  <h3>${p.nombre}</h3>
+                  <p>${p.descripcion}</p>
+                  <p>Categoría: ${p.categoria}</p>
+                  <p>Color: ${p.color}</p>
+                  <p>Marca: ${p.marca}</p>
+                  <p>Precio: $${p.precio.toFixed(2)}</p>
+                  <p>Disponibilidad: ${p.disponible ? 'Disponible' : 'No disponible'}</p>
+                  <button onclick="addToCart(${productos.indexOf(p)})">Agregar al carrito</button>
+                `;
                 listaProductos.appendChild(div);
             });
         }
@@ -352,17 +470,13 @@
                 alert('El carrito está vacío.');
                 return;
             }
-
             const total = cartItems.reduce((sum, p) => sum + p.precio, 0);
-
             const pedido = {
                 productos: [...cartItems],
                 total: total,
                 estado: 'Procesando'
             };
-
             socket.emit('nuevoPedido', pedido);
-
             alert('Compra realizada con éxito. Gracias por su pedido.');
             cartItems.length = 0;
             updateCart();
@@ -374,15 +488,14 @@
                 listaPedidos.innerHTML = '<li>No has realizado pedidos aún.</li>';
                 return;
             }
-
             pedidos.forEach((pedido, idx) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-              <strong>Pedido #${idx + 1}</strong><br/>
-              Productos: ${pedido.productos.map(p => p.nombre).join(', ')}<br/>
-              Total: $${pedido.total.toFixed(2)}<br/>
-              Estado: <span class="estado">${pedido.estado}</span>
-            `;
+                  <strong>Pedido #${idx + 1}</strong><br/>
+                  Productos: ${pedido.productos.map(p => p.nombre).join(', ')}<br/>
+                  Total: $${pedido.total.toFixed(2)}<br/>
+                  Estado: <span class="estado">${pedido.estado}</span>
+                `;
                 listaPedidos.appendChild(li);
             });
         }
@@ -390,37 +503,30 @@
         function mostrarModal(tipo) {
             const modal = document.getElementById('modal');
             const modalBody = document.getElementById('modal-body');
-
             if (tipo === 'categorias') {
                 modalBody.innerHTML = `
-                <h3 style= "text-align:center;">Categorías</h3>
-
-                <div class="catalogo-categorias">
-                    <div class="card-categoria" onclick="filtrarCategoria('Laptops')">
-                        <i class="fas fa-laptop-code fa-2x"></i>
-                        <span>Laptops</span>
+                    <h3 style="text-align:center;">Categorías</h3>
+                    <div class="catalogo-categorias">
+                        <div class="card-categoria" onclick="filtrarCategoria('Laptops')">
+                            <i class="fas fa-laptop-code fa-2x"></i>
+                            <span>Laptops</span>
+                        </div>
+                        <div class="card-categoria" onclick="filtrarCategoria('Celulares')">
+                            <i class="fas fa-mobile-alt fa-2x"></i>
+                            <span>Celulares</span>
+                        </div>
+                        <div class="card-categoria" onclick="filtrarCategoria('Perifericos')">
+                            <i class="fas fa-keyboard fa-2x"></i>
+                            <span>Periféricos</span>
+                        </div>
+                        <div class="card-categoria" onclick="filtrarCategoria('PCs')">
+                            <i class="fas fa-desktop fa-2x"></i>
+                            <span>PCs</span>
+                        </div>
                     </div>
-
-                <div class="card-categoria" onclick="filtrarCategoria('Celulares')">
-                    <i class="fas fa-mobile-alt fa-2x"></i>
-                    <span>Celulares</span>
-                </div>
-
-                <div class="card-categoria" onclick="filtrarCategoria('Perifericos')">
-                    <i class="fas fa-keyboard fa-2x"></i>
-                    <span>Perifericos</span>
-                </div>
-
-                <div class="card-categoria" onclick="filtrarCategoria('PCs')">
-                    <i class="fas fa-desktop fa-2x"></i>
-                    <span>PCs</span>
-                </div>
-            </div>
-        `;
-    }
-
-        modal.style.display = 'block';
-
+                `;
+            }
+            modal.style.display = 'block';
         }
 
         function cerrarModal() {
@@ -431,9 +537,13 @@
             const modal = document.getElementById('modal');
             if (event.target === modal) cerrarModal();
         };
-        
-        
 
+        // Para filtrar por categoría desde el modal de categorías
+        function filtrarCategoria(categoria) {
+            document.getElementById('filter-categoria').value = categoria;
+            aplicarFiltros();
+            cerrarModal();
+        }
     </script>
 </body>
 </html>
