@@ -190,12 +190,36 @@
         }
 
         /* Añade esto para estilizar la imagen dentro de cada producto */
+        /* Fija tamaño de imagen y ajusta su recorte */
         .product img {
             width: 100%;
-            height: auto;
+            height: 150px; /* alto predeterminado */
+            object-fit: cover; /* recorta si es necesario para no deformar */
             border-radius: 4px;
             margin-bottom: 10px;
         }
+
+        /* Limita el grid a 8 filas y permite scroll vertical */
+        #listaProductos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-rows: repeat(8, auto); /* máximo 8 filas */
+            gap: 20px;
+            max-height: calc(8 * (150px + /* altura img */ 10px /* margen */ + 130px /* resto tarjeta */) + 7 * 20px);
+            overflow-y: auto;
+        }
+
+        /* Select de colores dentro de cada tarjeta */
+        .product select.color-selector {
+            margin: 8px 0;
+            padding: 4px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
 
 
         button {
@@ -575,15 +599,19 @@
                 const div = document.createElement('div');
                 div.className = 'product';
                 div.innerHTML = `
-    <img src="${producto.imagen || 'https://via.placeholder.com/200'}" alt="${producto.nombre}">
-    <h3>${producto.nombre}</h3>
-    <p><b>Precio:</b> $${producto.precio.toFixed(2)}</p>
-    <p><b>Color:</b> ${producto.color}</p>
-    <p><b>Disponible:</b> ${producto.disponible ? 'Sí' : 'No'}</p>
-    <button ${!producto.disponible ? 'disabled' : ''} onclick="agregarAlCarrito(${producto.id})">
-        Agregar al carrito
-    </button>
+  <img src="${producto.imagenUrl || 'placeholder.png'}" alt="${producto.nombre}" />
+  <h3>${producto.nombre}</h3>
+  <p><b>Precio:</b> $${producto.precio.toFixed(2)}</p>
+  <p><b>Color:</b></p>
+  <select class="color-selector" id="color-${producto.id}">
+    ${(producto.colores || [producto.color]).map(c => `<option value="${c}">${c}</option>`).join('')}
+  </select>
+  <p><b>Disponible:</b> ${producto.disponible ? 'Sí' : 'No'}</p>
+  <button ${!producto.disponible ? 'disabled' : ''} onclick="agregarAlCarrito(${producto.id})">
+    Agregar al carrito
+  </button>
 `;
+
 
                 listaProductos.appendChild(div);
             });
@@ -591,8 +619,15 @@
 
 
         // Función para agregar producto al carrito
+        function obtenerColorSeleccionado(id) {
+            const sel = document.getElementById(`color-${id}`);
+            return sel ? sel.value : null;
+        }
+
         function agregarAlCarrito(id) {
-            const producto = productos.find(p => p.id === id);
+            const colorElegido = obtenerColorSeleccionado(id);
+            cartItems.push({ ...producto, cantidad: 1, colorSeleccionado: colorElegido });
+
             if (!producto || !producto.disponible) {
                 alert('Producto no disponible');
                 return;
