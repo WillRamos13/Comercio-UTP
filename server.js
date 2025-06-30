@@ -162,9 +162,22 @@ io.on('connection', (socket) => {
     socket.emit('pedidosActualizados', pedidos);
 
     socket.on('nuevoProducto', (producto) => {
-        productos.push(producto);
+        const nuevo = {
+            nombre: producto.nombre,
+            descripcion: producto.descripcion,
+            precio: producto.precio,
+            imagen: producto.imagen,
+            color: producto.color || '',
+            disponibilidad: producto.disponibilidad || 'Disponible',
+            categoria: producto.categoria || '',
+            marca: producto.marca || '',
+            oferta: producto.oferta || false,
+            descuento: producto.descuento || 0
+        };
+        productos.push(nuevo);
         io.emit('productosActualizados', productos);
     });
+
 
     socket.on('eliminarProducto', (index) => {
         if (index >= 0 && index < productos.length) {
