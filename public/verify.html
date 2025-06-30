@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title>Registro de Usuario</title>
+    <title>Verificación de Código</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,7 +23,7 @@
             font-weight: bold;
         }
 
-        input[type="text"], input[type="password"], input[type="email"] {
+        input[type="text"], input[type="email"] {
             width: 100%;
             padding: 0.5rem;
             margin-bottom: 1.2rem;
@@ -35,7 +35,7 @@
         button {
             width: 100%;
             padding: 0.7rem;
-            background-color: #007bff;
+            background-color: #28a745;
             border: none;
             color: white;
             font-weight: bold;
@@ -45,7 +45,7 @@
         }
 
             button:hover {
-                background-color: #0056b3;
+                background-color: #1e7e34;
             }
 
         #msg {
@@ -56,58 +56,45 @@
     </style>
 </head>
 <body>
-    <h2>Registro de Usuario</h2>
-    <form id="registerForm">
-        <label for="fullname">Nombre completo:</label>
-        <input type="text" id="fullname" name="fullname" required />
-
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" name="username" required />
-
-        <label for="email">Correo electrÃ³nico:</label>
+    <h2>Verificación de Código</h2>
+    <form id="verifyForm">
+        <label for="email">Correo electrónico:</label>
         <input type="email" id="email" name="email" required />
 
-        <label for="password">ContraseÃ±a:</label>
-        <input type="password" id="password" name="password" required />
+        <label for="code">Código recibido:</label>
+        <input type="text" id="code" name="code" required />
 
-        <button type="submit">Registrarse</button>
+        <button type="submit">Verificar</button>
     </form>
 
     <p id="msg"></p>
 
     <script>
-        const form = document.getElementById('registerForm');
+        const form = document.getElementById('verifyForm');
         const msg = document.getElementById('msg');
 
         form.addEventListener('submit', async e => {
             e.preventDefault();
 
-            const fullname = form.fullname.value.trim();
-            const username = form.username.value.trim();
             const email = form.email.value.trim();
-            const password = form.password.value;
+            const code = form.code.value.trim();
 
             try {
-                const response = await fetch('/register', {
+                const response = await fetch('/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullname, username, email, password }),
+                    body: JSON.stringify({ email, code }),
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
                     msg.style.color = 'green';
-                    msg.innerHTML = 'CÃ³digo enviado a tu correo. Por favor, verifica tu email.<br><br>' +
-                        '<button id="verifyRedirect">Ir a verificar cÃ³digo</button>';
+                    msg.textContent = 'Correo verificado correctamente. Ya puedes iniciar sesión.';
                     form.reset();
-
-                    document.getElementById('verifyRedirect').addEventListener('click', () => {
-                        window.location.href = '/verify.html';
-                    });
                 } else {
                     msg.style.color = 'red';
-                    msg.textContent = data.message || 'Error en el registro.';
+                    msg.textContent = data.message || 'Código incorrecto.';
                 }
             } catch (err) {
                 msg.style.color = 'red';
