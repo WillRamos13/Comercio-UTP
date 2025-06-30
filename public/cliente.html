@@ -676,6 +676,7 @@
             } else {
                 cartItems.push({ ...producto, cantidad: 1 });
             }
+            console.log('Carrito:', cartItems);
             actualizarCarritoUI();
         }
 
@@ -686,12 +687,42 @@
             cartList.innerHTML = '';
             cartItems.forEach(item => {
                 const li = document.createElement('li');
-                li.textContent = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toFixed(2)}`;
+
+                li.innerHTML = `
+            ${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toFixed(2)} 
+            <button aria-label="Disminuir cantidad de ${item.nombre}" class="btn-cantidad" data-id="${item.id}" data-action="decrement">-</button>
+            <button aria-label="Aumentar cantidad de ${item.nombre}" class="btn-cantidad" data-id="${item.id}" data-action="increment">+</button>
+        `;
+
                 cartList.appendChild(li);
             });
 
             const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
             cartTotal.textContent = total.toFixed(2);
+
+            // Asignar eventos a botones + y -
+            document.querySelectorAll('.btn-cantidad').forEach(btn => {
+                btn.onclick = () => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    const action = btn.getAttribute('data-action');
+                    modificarCantidad(id, action);
+                };
+            });
+        }
+
+        function modificarCantidad(id, accion) {
+            const index = cartItems.findIndex(item => item.id === id);
+            if (index === -1) return;
+
+            if (accion === 'increment') {
+                cartItems[index].cantidad++;
+            } else if (accion === 'decrement') {
+                cartItems[index].cantidad--;
+                if (cartItems[index].cantidad <= 0) {
+                    cartItems.splice(index, 1);
+                }
+            }
+            actualizarCarritoUI();
         }
 
 
