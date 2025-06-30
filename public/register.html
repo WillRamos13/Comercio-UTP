@@ -9,12 +9,14 @@
             max-width: 400px;
             margin: 50px auto;
             padding: 0 20px;
-            background: #f4f4f4;
+            background: white;
+            color: black;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 1.5rem;
+            color: black;
         }
 
         label {
@@ -28,14 +30,16 @@
             padding: 0.5rem;
             margin-bottom: 1.2rem;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: 1px solid black;
             font-size: 1rem;
+            background-color: white;
+            color: black;
         }
 
         button {
             width: 100%;
             padding: 0.7rem;
-            background-color: #007bff;
+            background-color: red;
             border: none;
             color: white;
             font-weight: bold;
@@ -45,14 +49,37 @@
         }
 
             button:hover {
-                background-color: #0056b3;
+                background-color: #a50000; /* rojo oscuro */
             }
 
         #msg {
             margin-top: 1rem;
             text-align: center;
             font-weight: bold;
+            color: black;
         }
+
+        .contacto {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid black;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+            .contacto h4 {
+                margin-bottom: 0.5rem;
+                color: red;
+            }
+
+            .contacto a {
+                color: black;
+                text-decoration: none;
+            }
+
+                .contacto a:hover {
+                    text-decoration: underline;
+                }
     </style>
 </head>
 <body>
@@ -75,9 +102,21 @@
 
     <p id="msg"></p>
 
+    <div class="contacto">
+        <h4>¿Necesitas ayuda?</h4>
+        <p>📧 Correo: <a href="mailto:soporte@comercio-utp.com">soporte@comercio-utp.com</a></p>
+        <p>📞 Teléfono: <a href="tel:+51987654321">+51 987 654 321</a></p>
+        <p>💬 WhatsApp: <a href="https://wa.me/51987654321" target="_blank">Chatea con soporte</a></p>
+    </div>
+
     <script>
         const form = document.getElementById('registerForm');
         const msg = document.getElementById('msg');
+
+        function validarPassword(password) {
+            const regex = /^(?=.*[A-Z])(?=.*\d).{10,}$/;
+            return regex.test(password);
+        }
 
         form.addEventListener('submit', async e => {
             e.preventDefault();
@@ -86,6 +125,12 @@
             const username = form.username.value.trim();
             const email = form.email.value.trim();
             const password = form.password.value;
+
+            if (!validarPassword(password)) {
+                msg.style.color = 'red';
+                msg.textContent = 'La contraseña debe tener al menos 10 caracteres, una mayúscula y un número.';
+                return;
+            }
 
             try {
                 const response = await fetch('/register', {
@@ -97,9 +142,10 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    msg.style.color = 'green';
+                    msg.style.color = 'black';
                     msg.innerHTML = 'Código enviado a tu correo. Por favor, verifica tu email.<br><br>' +
                         '<button id="verifyRedirect">Ir a verificar código</button>';
+
                     form.reset();
 
                     document.getElementById('verifyRedirect').addEventListener('click', () => {

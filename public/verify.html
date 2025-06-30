@@ -1,20 +1,22 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title>Verificación de Código</title>
+    <title>VerificaciÃ³n de CÃ³digo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 400px;
             margin: 50px auto;
             padding: 0 20px;
-            background: #f4f4f4;
+            background: white;
+            color: black;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 1.5rem;
+            color: black;
         }
 
         label {
@@ -28,14 +30,16 @@
             padding: 0.5rem;
             margin-bottom: 1.2rem;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: 1px solid black;
             font-size: 1rem;
+            background-color: white;
+            color: black;
         }
 
         button {
             width: 100%;
             padding: 0.7rem;
-            background-color: #28a745;
+            background-color: red;
             border: none;
             color: white;
             font-weight: bold;
@@ -45,7 +49,7 @@
         }
 
             button:hover {
-                background-color: #1e7e34;
+                background-color: #a50000;
             }
 
         #msg {
@@ -53,25 +57,72 @@
             text-align: center;
             font-weight: bold;
         }
+
+        #loginRedirect {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.7rem;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            #loginRedirect:hover {
+                background-color: #333;
+            }
+
+        .contacto {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid black;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+            .contacto h4 {
+                margin-bottom: 0.5rem;
+                color: red;
+            }
+
+            .contacto a {
+                color: black;
+                text-decoration: none;
+            }
+
+                .contacto a:hover {
+                    text-decoration: underline;
+                }
     </style>
 </head>
 <body>
-    <h2>Verificación de Código</h2>
+    <h2>VerificaciÃ³n de CÃ³digo</h2>
     <form id="verifyForm">
-        <label for="email">Correo electrónico:</label>
+        <label for="email">Correo electrÃ³nico:</label>
         <input type="email" id="email" name="email" required />
 
-        <label for="code">Código recibido:</label>
+        <label for="code">CÃ³digo recibido:</label>
         <input type="text" id="code" name="code" required />
 
         <button type="submit">Verificar</button>
     </form>
 
     <p id="msg"></p>
+    <button id="loginRedirect">Iniciar sesiÃ³n</button>
+
+    <div class="contacto">
+        <h4>Â¿Necesitas ayuda?</h4>
+        <p>ðŸ“§ Correo: <a href="mailto:soporte@comercio-utp.com">soporte@comercio-utp.com</a></p>
+        <p>ðŸ“ž TelÃ©fono: <a href="tel:+51987654321">+51 987 654 321</a></p>
+        <p>ðŸ’¬ WhatsApp: <a href="https://wa.me/51987654321" target="_blank">Chatea con soporte</a></p>
+    </div>
 
     <script>
         const form = document.getElementById('verifyForm');
         const msg = document.getElementById('msg');
+        const loginBtn = document.getElementById('loginRedirect');
 
         form.addEventListener('submit', async e => {
             e.preventDefault();
@@ -90,16 +141,21 @@
 
                 if (response.ok) {
                     msg.style.color = 'green';
-                    msg.textContent = 'Correo verificado correctamente. Ya puedes iniciar sesión.';
+                    msg.textContent = 'Correo verificado correctamente. Ya puedes iniciar sesiÃ³n.';
+                    loginBtn.style.display = 'block';
                     form.reset();
                 } else {
                     msg.style.color = 'red';
-                    msg.textContent = data.message || 'Código incorrecto.';
+                    msg.textContent = data.message || 'CÃ³digo incorrecto.';
                 }
             } catch (err) {
                 msg.style.color = 'red';
                 msg.textContent = 'Error al conectar con el servidor.';
             }
+        });
+
+        loginBtn.addEventListener('click', () => {
+            window.location.href = '/login.html';
         });
     </script>
 </body>
