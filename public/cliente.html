@@ -23,18 +23,20 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-            header img, header video {
+            header video {
                 width: 50px;
                 height: 50px;
             }
 
         .main-header {
             flex: 1;
-            text-align: center;
             font-size: 20px;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .menu {
@@ -77,7 +79,80 @@
         .menu:hover .menu-content {
             display: block;
         }
+        /* Buscador y filtros en header */
+        #search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #000;
+        }
 
+        #search-input {
+            padding: 6px 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #000;
+            width: 0;
+            opacity: 0;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            outline: none;
+        }
+
+            #search-input.active {
+                width: 220px;
+                opacity: 1;
+            }
+
+        #btn-filtros {
+            padding: 6px 12px;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+            #btn-filtros:hover {
+                background-color: #444;
+            }
+
+        #dropdown-filtros {
+            position: absolute;
+            top: 38px;
+            right: 0;
+            background: white;
+            color: black;
+            border: 1px solid #000;
+            border-radius: 6px;
+            padding: 10px;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1100;
+            width: 320px;
+            max-width: 90vw;
+        }
+
+            #dropdown-filtros label {
+                display: block;
+                margin-top: 8px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+            #dropdown-filtros select,
+            #dropdown-filtros input[type=number] {
+                width: 100%;
+                padding: 6px;
+                margin-top: 4px;
+                border: 1px solid #000;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+        /* Layout content */
         .content {
             display: flex;
             justify-content: space-between;
@@ -206,70 +281,66 @@
             .close:hover {
                 color: #000;
             }
-
-        .catalogo-categorias {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            padding: 10px;
-            text-align: center;
-            color: #000;
-        }
-
-        .card-categoria {
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-            .card-categoria:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            }
-
-            .card-categoria i {
-                margin-bottom: 8px;
-                color: #000;
-            }
-        /* Buscador y filtros */
-        #search-container {
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            color: #000;
-        }
-
-        #search-input {
-            flex: 2;
-            padding: 8px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #000;
-        }
-
-        select, input[type=number] {
-            flex: 1;
-            padding: 6px;
-            font-size: 14px;
-            border-radius: 5px;
-            border: 1px solid #000;
-            background: #fff;
-            color: #000;
-        }
     </style>
 </head>
 <body>
     <header>
         <video src="logo.mp4" autoplay muted loop></video>
         <div class="main-header">Bienvenido a Comercio UTP - Cliente</div>
+
+        <!-- Contenedor búsqueda -->
+        <div id="search-container">
+            <button id="btn-lupa" title="Buscar productos" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">
+                <i class="fas fa-search"></i>
+            </button>
+            <input type="text" id="search-input" placeholder="Buscar productos..." aria-label="Buscar productos" />
+            <button id="btn-filtros" title="Mostrar filtros">Filtros <i class="fas fa-filter"></i></button>
+
+            <!-- Panel filtros desplegable -->
+            <div id="dropdown-filtros" aria-label="Filtros de búsqueda">
+                <label for="filter-categoria">Categoría</label>
+                <select id="filter-categoria">
+                    <option value="">Todas categorías</option>
+                    <option value="Laptops">Laptops</option>
+                    <option value="Celulares">Celulares</option>
+                    <option value="Perifericos">Periféricos</option>
+                    <option value="PCs">PCs</option>
+                </select>
+
+                <label for="filter-color">Color</label>
+                <select id="filter-color">
+                    <option value="">Todos colores</option>
+                    <option value="Negro">Negro</option>
+                    <option value="Blanco">Blanco</option>
+                    <option value="Rojo">Rojo</option>
+                    <option value="Azul">Azul</option>
+                    <option value="Gris">Gris</option>
+                </select>
+
+                <label for="filter-marca">Marca</label>
+                <select id="filter-marca">
+                    <option value="">Todas marcas</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Samsung">Samsung</option>
+                    <option value="Dell">Dell</option>
+                    <option value="HP">HP</option>
+                </select>
+
+                <label for="filter-disponible">Disponibilidad</label>
+                <select id="filter-disponible">
+                    <option value="">Cualquiera</option>
+                    <option value="true">Disponible</option>
+                    <option value="false">No disponible</option>
+                </select>
+
+                <label for="filter-precio-min">Precio mínimo</label>
+                <input type="number" id="filter-precio-min" min="0" placeholder="0" />
+
+                <label for="filter-precio-max">Precio máximo</label>
+                <input type="number" id="filter-precio-max" min="0" placeholder="0" />
+            </div>
+        </div>
+
         <div class="menu">
             <button class="menu-button"><i class="fas fa-bars"></i></button>
             <div class="menu-content">
@@ -284,45 +355,6 @@
 
     <div class="content">
         <div class="left">
-            <!-- Filtros y búsqueda -->
-            <div id="search-container">
-                <input type="text" id="search-input" placeholder="Buscar productos..." oninput="aplicarFiltros()" />
-
-                <select id="filter-categoria" onchange="aplicarFiltros()">
-                    <option value="">Todas categorías</option>
-                    <option value="Laptops">Laptops</option>
-                    <option value="Celulares">Celulares</option>
-                    <option value="Perifericos">Periféricos</option>
-                    <option value="PCs">PCs</option>
-                </select>
-
-                <select id="filter-color" onchange="aplicarFiltros()">
-                    <option value="">Todos colores</option>
-                    <option value="Negro">Negro</option>
-                    <option value="Blanco">Blanco</option>
-                    <option value="Rojo">Rojo</option>
-                    <option value="Azul">Azul</option>
-                    <option value="Gris">Gris</option>
-                </select>
-
-                <select id="filter-marca" onchange="aplicarFiltros()">
-                    <option value="">Todas marcas</option>
-                    <option value="Apple">Apple</option>
-                    <option value="Samsung">Samsung</option>
-                    <option value="Dell">Dell</option>
-                    <option value="HP">HP</option>
-                </select>
-
-                <select id="filter-disponible" onchange="aplicarFiltros()">
-                    <option value="">Disponibilidad</option>
-                    <option value="true">Disponible</option>
-                    <option value="false">No disponible</option>
-                </select>
-
-                <input type="number" id="filter-precio-min" placeholder="Precio min." min="0" oninput="aplicarFiltros()" />
-                <input type="number" id="filter-precio-max" placeholder="Precio max." min="0" oninput="aplicarFiltros()" />
-            </div>
-
             <section id="productosDisponibles">
                 <h2>Productos disponibles</h2>
                 <div id="listaProductos"></div>
@@ -345,9 +377,9 @@
     </section>
 
     <!-- Modal reutilizable -->
-    <div id="modal" class="modal">
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
-            <span class="close" onclick="cerrarModal()">&times;</span>
+            <span class="close" onclick="cerrarModal()" aria-label="Cerrar">&times;</span>
             <div id="modal-body"></div>
         </div>
     </div>
@@ -376,6 +408,46 @@
         const listaPedidos = document.getElementById('listaPedidos');
         const carrito = document.getElementById('carrito');
 
+        const btnLupa = document.getElementById('btn-lupa');
+        const searchInput = document.getElementById('search-input');
+        const btnFiltros = document.getElementById('btn-filtros');
+        const dropdownFiltros = document.getElementById('dropdown-filtros');
+
+        // Toggle búsqueda activa
+        btnLupa.addEventListener('click', () => {
+            searchInput.classList.toggle('active');
+            if (searchInput.classList.contains('active')) {
+                searchInput.focus();
+            } else {
+                // Limpiar búsqueda si se cierra
+                searchInput.value = '';
+                aplicarFiltros();
+            }
+        });
+
+        // Toggle panel filtros
+        btnFiltros.addEventListener('click', () => {
+            if (dropdownFiltros.style.display === 'block') {
+                dropdownFiltros.style.display = 'none';
+            } else {
+                dropdownFiltros.style.display = 'block';
+            }
+        });
+
+        // Cerrar filtros si clic fuera
+        document.addEventListener('click', (e) => {
+            if (!dropdownFiltros.contains(e.target) && e.target !== btnFiltros) {
+                dropdownFiltros.style.display = 'none';
+            }
+        });
+
+        // Eventos para aplicar filtros en inputs y selects
+        searchInput.addEventListener('input', aplicarFiltros);
+        document.querySelectorAll('#dropdown-filtros select, #dropdown-filtros input').forEach(el => {
+            el.addEventListener('change', aplicarFiltros);
+            el.addEventListener('input', aplicarFiltros);
+        });
+
         socket.on('productosActualizados', (productosActualizados) => {
             productos = productosActualizados;
             aplicarFiltros(); // Renderizamos con filtros cada vez que llegan productos nuevos
@@ -387,7 +459,7 @@
         });
 
         function aplicarFiltros() {
-            const textoBusqueda = document.getElementById('search-input').value.toLowerCase();
+            const textoBusqueda = searchInput.value.toLowerCase();
             const categoriaFiltro = document.getElementById('filter-categoria').value;
             const colorFiltro = document.getElementById('filter-color').value;
             const marcaFiltro = document.getElementById('filter-marca').value;
@@ -434,11 +506,11 @@
                 div.innerHTML = `
                   <h3>${p.nombre}</h3>
                   <p>${p.descripcion}</p>
-                  <p>Categoría: ${p.categoria}</p>
-                  <p>Color: ${p.color}</p>
-                  <p>Marca: ${p.marca}</p>
-                  <p>Precio: $${p.precio.toFixed(2)}</p>
-                  <p>Disponibilidad: ${p.disponible ? 'Disponible' : 'No disponible'}</p>
+                  <p><strong>Categoría:</strong> ${p.categoria}</p>
+                  <p><strong>Color:</strong> ${p.color}</p>
+                  <p><strong>Marca:</strong> ${p.marca}</p>
+                  <p><strong>Precio:</strong> $${p.precio.toFixed(2)}</p>
+                  <p><strong>Disponibilidad:</strong> ${p.disponible ? 'Disponible' : 'No disponible'}</p>
                   <button onclick="addToCart(${productos.indexOf(p)})">Agregar al carrito</button>
                 `;
                 listaProductos.appendChild(div);
@@ -503,9 +575,10 @@
         function mostrarModal(tipo) {
             const modal = document.getElementById('modal');
             const modalBody = document.getElementById('modal-body');
+
             if (tipo === 'categorias') {
                 modalBody.innerHTML = `
-                    <h3 style="text-align:center;">Categorías</h3>
+                    <h3 style= "text-align:center;">Categorías</h3>
                     <div class="catalogo-categorias">
                         <div class="card-categoria" onclick="filtrarCategoria('Laptops')">
                             <i class="fas fa-laptop-code fa-2x"></i>
@@ -525,7 +598,10 @@
                         </div>
                     </div>
                 `;
+            } else if (tipo === 'cuponera') {
+                modalBody.innerHTML = `<h3 style="text-align:center;">Cuponera de descuento</h3><p>Próximamente...</p>`;
             }
+
             modal.style.display = 'block';
         }
 
@@ -533,17 +609,17 @@
             document.getElementById('modal').style.display = 'none';
         }
 
-        window.onclick = function (event) {
-            const modal = document.getElementById('modal');
-            if (event.target === modal) cerrarModal();
-        };
-
-        // Para filtrar por categoría desde el modal de categorías
+        // Filtrar rápido al seleccionar categoría del modal
         function filtrarCategoria(categoria) {
             document.getElementById('filter-categoria').value = categoria;
             aplicarFiltros();
             cerrarModal();
         }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) cerrarModal();
+        };
     </script>
 </body>
 </html>
