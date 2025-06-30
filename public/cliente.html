@@ -200,6 +200,36 @@
             .close:hover {
                 color: #000;
             }
+        .catalogo-categorias {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .card-categoria{
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-categoria:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .card-categoria i {
+            margin-bottom: 8px;
+            color: #007bff;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -360,12 +390,37 @@
         function mostrarModal(tipo) {
             const modal = document.getElementById('modal');
             const modalBody = document.getElementById('modal-body');
+
             if (tipo === 'categorias') {
-                modalBody.innerHTML = '<h3>Categorías</h3><p>Aquí van las categorías disponibles (Ejemplo).</p>';
-            } else if (tipo === 'cuponera') {
-                modalBody.innerHTML = '<h3>Cuponera de descuento</h3><p>Descuentos activos: 10% en toda la tienda (Ejemplo).</p>';
-            }
-            modal.style.display = 'block';
+                modalBody.innerHTML = `
+                <h3 style= "text-align:center;">Categorías</h3>
+
+                <div class="catalogo-categorias">
+                    <div class="card-categoria" onclick="filtrarCategoria('Laptops')">
+                        <i class="fas fa-laptop-code fa-2x"></i>
+                        <span>Laptops</span>
+                    </div>
+
+                <div class="card-categoria" onclick="filtrarCategoria('Celulares')">
+                    <i class="fas fa-mobile-alt fa-2x"></i>
+                    <span>Celulares</span>
+                </div>
+
+                <div class="card-categoria" onclick="filtrarCategoria('Perifericos')">
+                    <i class="fas fa-keyboard fa-2x"></i>
+                    <span>Perifericos</span>
+                </div>
+
+                <div class="card-categoria" onclick="filtrarCategoria('PCs')">
+                    <i class="fas fa-desktop fa-2x"></i>
+                    <span>PCs</span>
+                </div>
+            </div>
+        `;
+    }
+
+        modal.style.display = 'block';
+
         }
 
         function cerrarModal() {
@@ -376,6 +431,9 @@
             const modal = document.getElementById('modal');
             if (event.target === modal) cerrarModal();
         };
+        
+        
+
     </script>
 </body>
 </html>
