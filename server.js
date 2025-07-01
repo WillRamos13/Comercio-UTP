@@ -165,6 +165,7 @@ io.on('connection', (socket) => {
         console.log('📦 Producto recibido en el servidor:', producto); // <-- ESTE ES EL PASO 2
 
         const nuevo = {
+            id: productos.length + 1,
             nombre: producto.nombre,
             descripcion: producto.descripcion,
             precio: producto.precio,
@@ -176,6 +177,7 @@ io.on('connection', (socket) => {
             oferta: producto.oferta || false,
             descuento: producto.descuento || 0
         };
+
         productos.push(nuevo);
         io.emit('productosActualizados', productos);
     });
