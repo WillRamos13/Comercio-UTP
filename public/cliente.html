@@ -876,9 +876,9 @@
 
         // Actualizar listado productos (cuando haya cambios)
         socket.on('productosActualizados', (data) => {
-            productos = data.map((p, i) => ({ id: i + 1, ...p }));
+            productos = data; 
             aplicarFiltros();
-        });
+
 
     </script>
 </body>
