@@ -532,16 +532,18 @@
             .then(res => res.json())
             .then(data => {
                 if (data.fullname) {
-                    // Aquí puedes colocar el saludo si tienes un elemento para mostrarlo
-                    // Por ejemplo: document.getElementById('bienvenida').textContent = `Bienvenido, Cliente ${data.fullname}`;
+                    clienteFullname = data.fullname; 
                 }
             })
+
             .catch(err => console.error('Error al obtener la sesión:', err));
 
         let productos = [];
         let productosFiltrados = [];
         let cartItems = [];
         let pedidos = [];
+        let clienteFullname = '';
+
 
         const listaProductos = document.getElementById('listaProductos');
         const cartList = document.getElementById('cart-items');
@@ -585,9 +587,10 @@
 
             const total = cartItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
             const pedido = {
-                id: Date.now(), // ID único temporal
+                id: Date.now(),
                 fecha: new Date().toLocaleString(),
                 total,
+                cliente: clienteFullname, // 👈 AGREGA AQUÍ
                 productos: cartItems.map(item => ({
                     id: item.id,
                     nombre: item.nombre,
@@ -597,7 +600,8 @@
                 }))
             };
 
-            socket.emit('nuevoPedido', pedido); // Enviar al servidor
+            socket.emit('nuevoPedido', pedido);
+
 
             alert('Compra realizada con éxito.');
 
