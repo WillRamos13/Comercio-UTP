@@ -192,9 +192,15 @@ io.on('connection', (socket) => {
         const nombreCliente = socket.handshake.session.user?.fullname || 'Cliente Anónimo';
         const pedidoConNombre = {
             ...pedido,
-            cliente: nombreCliente
+            cliente: nombreCliente,
+            id: pedidos.length + 1 // Asigna un ID único al pedido
         };
         pedidos.push(pedidoConNombre);
+
+        // ✅ Emitimos el evento esperado por el cliente
+        io.emit('pedidoAgregado', pedidoConNombre);
+
+        // Opcional: actualizar toda la lista si otros clientes también ven pedidos
         io.emit('pedidosActualizados', pedidos);
     });
 
@@ -204,7 +210,6 @@ io.on('connection', (socket) => {
             io.emit('pedidosActualizados', pedidos);
         }
     });
-});
 
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en puerto ${PORT}`);
