@@ -606,11 +606,10 @@
   <select class="color-selector" id="color-${producto.id}">
     ${(producto.colores || [producto.color]).map(c => `<option value="${c}">${c}</option>`).join('')}
   </select>
-<p><b>Disponibilidad:</b> ${producto.disponibilidad}</p>
-<button ${producto.disponibilidad !== 'Disponible' ? 'disabled' : ''} onclick="agregarAlCarrito(${producto.id})">
+<button onclick="agregarAlCarrito(${producto.id})">
+  Agregar al carrito
+</button>
 
-    Agregar al carrito
-  </button>
 `;
 
 
@@ -626,21 +625,21 @@
         }
 
         function agregarAlCarrito(id) {
-            const colorElegido = obtenerColorSeleccionado(id);
-            cartItems.push({ ...producto, cantidad: 1, colorSeleccionado: colorElegido });
+            const producto = productos.find(p => p.id === id);
+            if (!producto) return;
 
-            if (!producto || !producto.disponible) {
-                alert('Producto no disponible');
-                return;
-            }
-            const itemExistente = cartItems.find(item => item.id === id);
+            const colorElegido = obtenerColorSeleccionado(id);
+            const itemExistente = cartItems.find(item => item.id === id && item.colorSeleccionado === colorElegido);
+
             if (itemExistente) {
                 itemExistente.cantidad++;
             } else {
-                cartItems.push({ ...producto, cantidad: 1 });
+                cartItems.push({ ...producto, cantidad: 1, colorSeleccionado: colorElegido });
             }
+
             actualizarCarrito();
         }
+
 
         // Actualizar lista y total del carrito
         function actualizarCarrito() {
