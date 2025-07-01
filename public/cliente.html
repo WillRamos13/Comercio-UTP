@@ -453,6 +453,7 @@
             <div class="menu-content">
                 <a href="#" onclick="mostrarModal('categorias')"><i class="fas fa-list"></i> Categorías</a>
                 <a href="#" onclick="mostrarModal('cuponera')"><i class="fas fa-tags"></i> Cuponera de descuento</a>
+                <a href="#" onclick="mostrarModal('pedidos')"><i class="fas fa-box"></i> Mis pedidos</a>
                 <a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
             </div>
         </div>
@@ -471,10 +472,7 @@
         </div>
     </div>
 
-    <section id="misPedidos">
-        <h2>Mis pedidos realizados</h2>
-        <ul id="listaPedidos"></ul>
-    </section>
+
 
     <!-- Modal reutilizable -->
     <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none; position: fixed; top: 0; left: 0; right:0; bottom:0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
@@ -699,29 +697,44 @@
         function mostrarModal(tipo) {
             const modal = document.getElementById('modal');
             const modalBody = document.getElementById('modal-body');
+
             if (tipo === 'categorias') {
                 modalBody.innerHTML = `
-                        <h2 id="modalTitle">Categorías</h2>
-                        <ul>
-                            <li>Laptops</li>
-                            <li>Celulares</li>
-                            <li>Periféricos</li>
-                            <li>PCs</li>
-                        </ul>
-                    `;
+            <h2 id="modalTitle">Categorías</h2>
+            <ul>
+                <li>Laptops</li>
+                <li>Celulares</li>
+                <li>Periféricos</li>
+                <li>PCs</li>
+            </ul>
+        `;
             } else if (tipo === 'cuponera') {
                 modalBody.innerHTML = `
-                        <h2 id="modalTitle">Cuponera de Descuento</h2>
-                        <ul>
-                            <li>CUPON10 - 10% de descuento</li>
-                            <li>CUPON20 - 20% de descuento</li>
-                            <li>CUPON30 - 30% de descuento</li>
-                        </ul>
-                    `;
+            <h2 id="modalTitle">Cuponera de Descuento</h2>
+            <ul>
+                <li>CUPON10 - 10% de descuento</li>
+                <li>CUPON20 - 20% de descuento</li>
+                <li>CUPON30 - 30% de descuento</li>
+            </ul>
+        `;
+            } else if (tipo === 'pedidos') {
+                let contenido = '<h2 id="modalTitle">Mis pedidos realizados</h2>';
+                if (pedidos.length === 0) {
+                    contenido += '<p>No tienes pedidos realizados.</p>';
+                } else {
+                    contenido += '<ul>';
+                    pedidos.forEach(p => {
+                        contenido += `<li>Pedido #${p.id} - Fecha: ${p.fecha} - Total: $${p.total.toFixed(2)}</li>`;
+                    });
+                    contenido += '</ul>';
+                }
+                modalBody.innerHTML = contenido;
             }
+
             modal.style.display = 'flex';
             modal.focus();
         }
+
         function cerrarModal() {
             const modal = document.getElementById('modal');
             modal.style.display = 'none';
