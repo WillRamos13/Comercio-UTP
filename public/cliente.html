@@ -606,8 +606,9 @@
   <select class="color-selector" id="color-${producto.id}">
     ${(producto.colores || [producto.color]).map(c => `<option value="${c}">${c}</option>`).join('')}
   </select>
-  <p><b>Disponible:</b> ${producto.disponible ? 'Sí' : 'No'}</p>
-  <button ${!producto.disponible ? 'disabled' : ''} onclick="agregarAlCarrito(${producto.id})">
+<p><b>Disponibilidad:</b> ${producto.disponibilidad}</p>
+<button ${producto.disponibilidad !== 'Disponible' ? 'disabled' : ''} onclick="agregarAlCarrito(${producto.id})">
+
     Agregar al carrito
   </button>
 `;
