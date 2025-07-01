@@ -211,6 +211,9 @@ io.on('connection', (socket) => {
         }
     });
 
+}); // <== ESTA LLAVE FALTABA AQUÍ
+
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en puerto ${PORT}`);
 });
+
