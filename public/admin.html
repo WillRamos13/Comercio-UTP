@@ -243,8 +243,10 @@
                 marca: form.marca.value,
                 enOferta: checkboxOferta.checked,
                 descuento: checkboxOferta.checked ? parseFloat(form.descuento.value) : 0,
-                imagen: imagen
+                imagen: imagen,
+                disponible: true  // ✅ ESTA LÍNEA ES LA CLAVE
             };
+
 
             socket.emit('nuevoProducto', nuevoProducto);
             form.reset();
