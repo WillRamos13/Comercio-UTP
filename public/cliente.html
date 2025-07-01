@@ -595,6 +595,7 @@
                     color: item.colorSeleccionado,
                     cantidad: item.cantidad,
                     precio: item.precio
+                    estado: "Pendiente"
                 }))
             };
 
@@ -676,7 +677,7 @@
             }
             const total = cartItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
             cartTotal.textContent = total.toFixed(2);
-            cartCount.textContent = cartItems.length;
+            cartCount.textContent = cartItems.reduce((acc, item) => acc + item.cantidad, 0);
         }
 
         // Render pedidos realizados
@@ -687,7 +688,7 @@
             } else {
                 pedidos.forEach(pedido => {
                     const li = document.createElement('li');
-                    li.textContent = `Pedido #${pedido.id} - Fecha: ${pedido.fecha} - Total: $${pedido.total.toFixed(2)}`;
+                    li.textContent = `Pedido #${pedido.id} - Fecha: ${pedido.fecha} - Total: $${pedido.total.toFixed(2)} - Estado: ${pedido.estado || 'Pendiente'}`;
                     listaPedidos.appendChild(li);
                 });
             }
@@ -863,6 +864,15 @@
             pedidos = pedidos.filter(p => p.id !== id);
             renderPedidos();
         });
+        // Actualización de estado de un pedido desde el panel admin
+        socket.on('estadoPedidoActualizado', ({ id, nuevoEstado }) => {
+            const pedido = pedidos.find(p => p.id === id);
+            if (pedido) {
+                pedido.estado = nuevoEstado;
+                renderPedidos(); // Vuelve a pintar la lista con el estado actualizado
+            }
+        });
+
 
         // Actualizar listado productos (cuando haya cambios)
         socket.on('productosActualizados', (data) => {
