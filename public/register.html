@@ -1,165 +1,208 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <title>Registro de Usuario</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 0 20px;
-            background: white;
-            color: black;
-        }
+const express = require('express');
+const path = require('path');
+const http = require('http');
+const session = require('express-session');
+const sharedSession = require("express-socket.io-session");
+const { Server } = require("socket.io");
+const nodemailer = require('nodemailer');
 
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: black;
-        }
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
-        label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-weight: bold;
-        }
+const PORT = process.env.PORT || 3000;
 
-        input[type="text"], input[type="password"], input[type="email"] {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1.2rem;
-            border-radius: 5px;
-            border: 1px solid black;
-            font-size: 1rem;
-            background-color: white;
-            color: black;
-        }
+const users = [
+    { username: 'admin', password: 'admin123', role: 'admin', fullname: 'Administrador Principal', email: 'admin@admin.com' },
+    { username: 'cliente', password: 'cliente123', role: 'client', fullname: 'Cliente Ejemplo', email: 'cliente@cliente.com' },
+];
 
-        button {
-            width: 100%;
-            padding: 0.7rem;
-            background-color: red;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
+let productos = [];
+let pedidos = [];
 
-            button:hover {
-                background-color: #a50000; /* rojo oscuro */
-            }
+const sessionMiddleware = session({
+    secret: 'mi_secreto_super_seguro',
+    resave: false,
+    saveUninitialized: false,
+});
 
-        #msg {
-            margin-top: 1rem;
-            text-align: center;
-            font-weight: bold;
-            color: black;
-        }
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(sessionMiddleware);
 
-        .contacto {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid black;
-            font-size: 0.9rem;
-            text-align: center;
-        }
+app.use(express.static(path.join(__dirname, 'public')));
 
-            .contacto h4 {
-                margin-bottom: 0.5rem;
-                color: red;
-            }
+io.use(sharedSession(sessionMiddleware, {
+    autoSave: true
+}));
 
-            .contacto a {
-                color: black;
-                text-decoration: none;
-            }
+const usuariosPendientes = {};
 
-                .contacto a:hover {
-                    text-decoration: underline;
-                }
-    </style>
-</head>
-<body>
-    <h2>Registro de Usuario</h2>
-    <form id="registerForm">
-        <label for="fullname">Nombre completo:</label>
-        <input type="text" id="fullname" name="fullname" required />
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'willramosllamocca13@gmail.com', 
+        pass: 'abcd efgh ijkl mnop' 
+    }
+});
 
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" name="username" required />
+app.post('/register', (req, res) => {
+    const { username, password, fullname, email } = req.body;
 
-        <label for="email">Correo electrónico:</label>
-        <input type="email" id="email" name="email" required />
+    if (users.some(u => u.username === username)) {
+        return res.status(400).json({ message: 'El usuario ya existe' });
+    }
+    if (users.some(u => u.email === email) || usuariosPendientes[email]) {
+        return res.status(400).json({ message: 'El correo ya está registrado' });
+    }
 
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required />
+    const codigo = Math.floor(100000 + Math.random() * 900000);
 
-        <button type="submit">Registrarse</button>
-    </form>
+    usuariosPendientes[email] = { username, password, fullname, email, codigo };
 
-    <p id="msg"></p>
+    transporter.sendMail({
+        from: 'willramosllamocca13@gmail.com', 
+        to: email,
+        subject: 'Código de verificación',
+        text: `Hola ${fullname}, tu código de verificación es: ${codigo}`
+    }).then(() => {
+        console.log('Correo enviado a:', email);
+    }).catch(error => {
+        console.error('Error enviando correo, pero usuario guardado:', error);
+    });
 
-    <div class="contacto">
-        <h4>¿Necesitas ayuda?</h4>
-        <p>📧 Correo: <a href="mailto:soporte@comercio-utp.com">soporte@comercio-utp.com</a></p>
-        <p>📞 Teléfono: <a href="tel:+51987654321">+51 987 654 321</a></p>
-        <p>💬 WhatsApp: <a href="https://wa.me/51987654321" target="_blank">Chatea con soporte</a></p>
-    </div>
+    res.json({ message: 'Usuario registrado. Se intentó enviar código de verificación al correo.' });
+});
 
-    <script>
-        const form = document.getElementById('registerForm');
-        const msg = document.getElementById('msg');
+app.post('/verify', (req, res) => {
+    const { email, code } = req.body;
+    const userPendiente = usuariosPendientes[email];
 
-        function validarPassword(password) {
-            const regex = /^(?=.*[A-Z])(?=.*\d).{10,}$/;
-            return regex.test(password);
-        }
+    if (!userPendiente) {
+        return res.status(400).json({ message: 'Correo no encontrado o ya verificado' });
+    }
 
-        form.addEventListener('submit', async e => {
-            e.preventDefault();
-
-            const fullname = form.fullname.value.trim();
-            const username = form.username.value.trim();
-            const email = form.email.value.trim();
-            const password = form.password.value;
-
-            if (!validarPassword(password)) {
-                msg.style.color = 'red';
-                msg.textContent = 'La contraseña debe tener al menos 10 caracteres, una mayúscula y un número.';
-                return;
-            }
-
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullname, username, email, password }),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    msg.style.color = 'black';
-                    msg.innerHTML = 'Código enviado a tu correo. Por favor, verifica tu email.<br><br>' +
-                        '<button id="verifyRedirect">Ir a verificar código</button>';
-
-                    form.reset();
-
-                    document.getElementById('verifyRedirect').addEventListener('click', () => {
-                        window.location.href = '/verify.html';
-                    });
-                } else {
-                    msg.style.color = 'red';
-                    msg.textContent = data.message || 'Error en el registro.';
-                }
-            } catch (err) {
-                msg.style.color = 'red';
-                msg.textContent = 'Error al conectar con el servidor.';
-            }
+    if (userPendiente.codigo == code) {
+        users.push({
+            username: userPendiente.username,
+            password: userPendiente.password,
+            fullname: userPendiente.fullname,
+            email: userPendiente.email,
+            role: 'client'
         });
-    </script>
-</body>
-</html>
+        delete usuariosPendientes[email];
+        return res.json({ message: 'Correo verificado. Registro completado.' });
+    } else {
+        return res.status(400).json({ message: 'Código incorrecto' });
+    }
+});
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+        req.session.user = {
+            username: user.username,
+            role: user.role,
+            fullname: user.fullname,
+        };
+        return res.json({ message: 'Login exitoso', role: user.role, fullname: user.fullname });
+    } else {
+        return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+    }
+});
+
+app.get('/session-info', (req, res) => {
+    if (req.session.user) {
+        res.json({
+            username: req.session.user.username,
+            fullname: req.session.user.fullname,
+            role: req.session.user.role
+        });
+    } else {
+        res.status(401).json({ message: 'No autenticado' });
+    }
+});
+
+function authRole(role) {
+    return (req, res, next) => {
+        if (req.session.user && req.session.user.role === role) {
+            next();
+        } else {
+            res.redirect('/login.html');
+        }
+    };
+}
+
+app.get('/admin.html', authRole('admin'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/cliente.html', authRole('client'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'cliente.html'));
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login.html');
+    });
+});
+
+io.on('connection', (socket) => {
+    console.log('Usuario conectado:', socket.id);
+
+    socket.emit('productosActualizados', productos);
+    socket.emit('pedidosActualizados', pedidos);
+
+    socket.on('nuevoProducto', (producto) => {
+        const nuevo = {
+            id: productos.length + 1,
+            nombre: producto.nombre,
+            descripcion: producto.descripcion,
+            precio: producto.precio,
+            imagen: producto.imagen,
+            color: producto.color || '',
+            disponibilidad: producto.disponibilidad || 'Disponible',
+            categoria: producto.categoria || '',
+            marca: producto.marca || '',
+            oferta: producto.oferta || false,
+            descuento: producto.descuento || 0
+        };
+
+        productos.push(nuevo);
+        io.emit('productosActualizados', productos);
+    });
+
+    socket.on('eliminarProducto', (index) => {
+        if (index >= 0 && index < productos.length) {
+            productos.splice(index, 1);
+            io.emit('productosActualizados', productos);
+        }
+    });
+
+    socket.on('nuevoPedido', (pedido) => {
+        const nombreCliente = socket.handshake.session.user?.fullname || 'Cliente Anónimo';
+        const pedidoConNombre = {
+            ...pedido,
+            cliente: nombreCliente,
+            id: pedidos.length + 1
+        };
+        pedidos.push(pedidoConNombre);
+
+        io.emit('pedidoAgregado', pedidoConNombre);
+        io.emit('pedidosActualizados', pedidos);
+    });
+
+    socket.on('cambiarEstadoPedido', ({ index, estado }) => {
+        if (index >= 0 && index < pedidos.length) {
+            pedidos[index].estado = estado;
+            io.emit('pedidosActualizados', pedidos);
+        }
+    });
+});
+
+server.listen(PORT, () => {
+    console.log(`Servidor escuchando en puerto ${PORT}`);
+});
+
