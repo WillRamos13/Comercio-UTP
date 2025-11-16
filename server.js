@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express'); const express = require('express');
 const path = require('path');
 const http = require('http');
 const session = require('express-session');
@@ -12,7 +12,6 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-// 🔥 FIX: Agregar email a los usuarios por defecto
 const users = [
     { username: 'admin', password: 'admin123', role: 'admin', fullname: 'Administrador Principal', email: 'admin@admin.com' },
     { username: 'cliente', password: 'cliente123', role: 'client', fullname: 'Cliente Ejemplo', email: 'cliente@cliente.com' },
@@ -37,10 +36,8 @@ io.use(sharedSession(sessionMiddleware, {
     autoSave: true
 }));
 
-// Usuarios pendientes por verificar email
 const usuariosPendientes = {};
 
-// Configura tu transporte de correo (Gmail con contraseña de aplicación)
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -49,8 +46,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Registro
-app.post('/register', async (req, res) => {
+app.post('/register', (req, res) => {
     const { username, password, fullname, email } = req.body;
 
     if (users.some(u => u.username === username)) {
@@ -64,22 +60,20 @@ app.post('/register', async (req, res) => {
 
     usuariosPendientes[email] = { username, password, fullname, email, codigo };
 
-    try {
-        await transporter.sendMail({
-            from: 'Tu App <tucorreo@gmail.com>',
-            to: email,
-            subject: 'Código de verificación',
-            text: `Hola ${fullname}, tu código de verificación es: ${codigo}`
-        });
+    transporter.sendMail({
+        from: 'Tu App <tucorreo@gmail.com>',
+        to: email,
+        subject: 'Código de verificación',
+        text: `Hola ${fullname}, tu código de verificación es: ${codigo}`
+    }).then(() => {
+        console.log('Correo enviado a:', email);
+    }).catch(error => {
+        console.error('Error enviando correo, pero usuario guardado:', error);
+    });
 
-        res.json({ message: 'Código de verificación enviado al correo' });
-    } catch (error) {
-        console.error('Error enviando correo:', error);
-        res.status(500).json({ message: 'No se pudo enviar el correo' });
-    }
+    res.json({ message: 'Usuario registrado. Se intentó enviar código de verificación al correo.' });
 });
 
-// Verificar código
 app.post('/verify', (req, res) => {
     const { email, code } = req.body;
     const userPendiente = usuariosPendientes[email];
@@ -103,7 +97,6 @@ app.post('/verify', (req, res) => {
     }
 });
 
-// Login
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const user = users.find(u => u.username === username && u.password === password);
@@ -163,8 +156,6 @@ io.on('connection', (socket) => {
     socket.emit('pedidosActualizados', pedidos);
 
     socket.on('nuevoProducto', (producto) => {
-        console.log('📦 Producto recibido en el servidor:', producto);
-
         const nuevo = {
             id: productos.length + 1,
             nombre: producto.nombre,
@@ -209,8 +200,7 @@ io.on('connection', (socket) => {
             io.emit('pedidosActualizados', pedidos);
         }
     });
-
-}); // ← Cierre correcto
+});
 
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en puerto ${PORT}`);
