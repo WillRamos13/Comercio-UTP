@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Panel Admin - Tienda Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header.header-container {
+            width: 100%;
+            background-color: #222;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+        }
+
+        .title {
+            font-size: 18px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .menu {
+            margin-right: 50px;
+            position: relative;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .menu-list {
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background-color: #333;
+            color: white;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            border-radius: 5px;
+            z-index: 999;
+        }
+
+            .menu-list a {
+                padding: 10px 15px;
+                color: white;
+                text-decoration: none;
+                border-bottom: 1px solid #444;
+            }
+
+                .menu-list a:hover {
+                    background-color: #444;
+                }
+
+        .menu:hover .menu-list {
+            display: flex;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        form {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        input, textarea, select {
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .productoItem {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+
+            .productoItem button {
+                background-color: red;
+                margin-top: 5px;
+            }
+
+        .card {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .pedidoItem {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+            .pedidoItem select {
+                margin-top: 5px;
+                padding: 5px;
+                font-size: 14px;
+            }
+
+        img.preview {
+            max-width: 100px;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-container">
+        <video src="logo.mp4" width="50" autoplay muted loop></video>
+        <h2 class="title">Bienvenido Administrador</h2>
+        <div class="menu">
+            <button class="menu-button">☰</button>
+            <div class="menu-list">
+                <a href="#" onclick="mostrarSeccion('formulario')">Agregar Producto</a>
+                <a href="#" onclick="mostrarSeccion('productosLista')">Ver Productos</a>
+                <a href="#" onclick="mostrarSeccion('pedidos')">Pedidos</a>
+                <a href="#" onclick="mostrarSeccion('registroVentas')">Registro de Ventas</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <form id="formProducto">
+            <input type="text" id="nombre" placeholder="Nombre producto" required />
+            <textarea id="descripcion" placeholder="Descripción" rows="3" required></textarea>
+            <input type="number" id="precio" placeholder="Precio" min="0" step="0.01" required />
+            <input type="text" id="color" placeholder="Color" />
+            <input type="text" id="disponibilidad" placeholder="Disponibilidad" />
+            <input type="text" id="categoria" placeholder="Categoría" />
+            <input type="text" id="marca" placeholder="Marca" />
+            <label><input type="checkbox" id="enOferta"> En oferta</label>
+            <input type="number" id="descuento" placeholder="Descuento (%)" min="0" max="100" style="display:none;" />
+            <input type="file" id="imagen" accept="image/*" />
+            <img id="preview" class="preview" src="" alt="" style="display:none;">
+            <button type="submit">Agregar producto</button>
+        </form>
+
+        <section id="productosLista" class="hidden">
+            <h2>Productos agregados</h2>
+            <div id="lista"></div>
+        </section>
+
+        <section id="registroVentas" class="hidden">
+            <h2>Registro de Ventas</h2>
+            <div id="ventas"></div>
+        </section>
+
+        <section id="pedidos" class="hidden">
+            <h2>Pedidos</h2>
+            <div id="pedidosLista"></div>
+        </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const form = document.getElementById('formProducto');
+        const lista = document.getElementById('lista');
+        const ventasDiv = document.getElementById('ventas');
+        const pedidosDiv = document.getElementById('pedidosLista');
+        const preview = document.getElementById('preview');
+        const checkboxOferta = document.getElementById('enOferta');
+        const inputDescuento = document.getElementById('descuento');
+
+        checkboxOferta.addEventListener('change', () => {
+            inputDescuento.style.display = checkboxOferta.checked ? 'block' : 'none';
+        });
+
+        form.imagen.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    preview.src = evt.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            const imagen = preview.src.includes('data:image') ? preview.src : null;
+
+            const nuevoProducto = {
+                nombre: form.nombre.value,
+                descripcion: form.descripcion.value,
+                precio: parseFloat(form.precio.value),
+                color: form.color.value,
+                disponibilidad: form.disponibilidad.value,
+                categoria: form.categoria.value,
+                marca: form.marca.value,
+                enOferta: checkboxOferta.checked,
+                descuento: checkboxOferta.checked ? parseFloat(form.descuento.value) : 0,
+                imagen: imagen,
+                disponible: true  // ✅ ESTA LÍNEA ES LA CLAVE
+            };
+            console.log('Enviando producto desde admin:', nuevoProducto);
+
+
+
+            socket.emit('nuevoProducto', nuevoProducto);
+            form.reset();
+            preview.src = '';
+            preview.style.display = 'none';
+            inputDescuento.style.display = 'none';
+        });
+
+        socket.on('productosActualizados', (productos) => {
+            lista.innerHTML = '';
+            productos.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.classList.add('productoItem');
+                div.innerHTML = `
+                      <strong>${p.nombre}</strong><br>
+                      ${p.imagen ? `<img src="${p.imagen}" class="preview" />` : ''}
+                      <p>${p.descripcion}</p>
+                      <p>Precio: $${p.precio.toFixed(2)}</p>
+                      <button onclick="eliminarProducto(${index})">Eliminar</button>
+                    `;
+                lista.appendChild(div);
+            });
+        });
+
+        function eliminarProducto(index) {
+            if (confirm("¿Estás seguro de eliminar este producto?")) {
+                socket.emit('eliminarProducto', index);
+            }
+        }
+
+        socket.on('pedidosActualizados', (pedidos) => {
+            ventasDiv.innerHTML = '';
+            pedidosDiv.innerHTML = '';
+            pedidos.forEach((pedido, i) => {
+                const venta = document.createElement('div');
+                venta.classList.add('card');
+                venta.textContent = `Venta #${i + 1} - Cliente ${pedido.cliente} - $${pedido.total.toFixed(2)}`;
+                ventasDiv.appendChild(venta);
+
+                const pedidoCard = document.createElement('div');
+                pedidoCard.classList.add('pedidoItem');
+                pedidoCard.innerHTML = `
+                      <strong>Pedido #${i + 1}</strong><br/>
+                      Cliente: ${pedido.cliente}<br/>
+                      Productos: ${pedido.productos.map(p => p.nombre).join(', ')}<br/>
+                      Total: $${pedido.total.toFixed(2)}<br/>
+                      Estado:
+                      <select data-index="${i}">
+                        <option value="Procesando" ${pedido.estado === 'Procesando' ? 'selected' : ''}>Procesando</option>
+                        <option value="Enviado" ${pedido.estado === 'Enviado' ? 'selected' : ''}>Enviado</option>
+                        <option value="Entregado" ${pedido.estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                        <option value="Cancelado" ${pedido.estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                      </select>
+                    `;
+                pedidosDiv.appendChild(pedidoCard);
+            });
+
+            document.querySelectorAll('#pedidosLista select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const idx = e.target.getAttribute('data-index');
+                    const nuevoEstado = e.target.value;
+                    socket.emit('cambiarEstadoPedido', { index: parseInt(idx), estado: nuevoEstado });
+                });
+            });
+        });
+
+        function mostrarSeccion(seccionId) {
+            document.getElementById('formProducto').style.display = 'none';
+            document.getElementById('productosLista').classList.add('hidden');
+            document.getElementById('registroVentas').classList.add('hidden');
+            document.getElementById('pedidos').classList.add('hidden');
+
+            if (seccionId === 'formulario') {
+                document.getElementById('formProducto').style.display = 'flex';
+            } else {
+                document.getElementById(seccionId).classList.remove('hidden');
+            }
+        }
+
+        // Mostrar productos por defecto
+        mostrarSeccion('productosLista');
+    </script>
+</body>
+</html>

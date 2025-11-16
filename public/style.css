@@ -1,0 +1,139 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 0 20px;
+    background: #f4f4f4;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input {
+    padding: 8px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #007bff;
+}
+.cart {
+    background-color: #f1f1f1;
+    padding: 15px;
+    border-radius: 6px;
+    position: sticky;
+    top: 20px;
+}
+header {
+    width: 100%;
+    background-color: #333;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+    header img {
+        height: 40px;
+    }
+
+.logout {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: 1px solid white;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+    .logout:hover {
+        background-color: #555;
+    }
+header.header-container {
+    width: 100%;
+    background-color: #222;
+    color: white;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 10px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.logo {
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.title {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 18px;
+}
+
+.logout {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: 1px solid white;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    flex-shrink: 0;
+}
+
+    .logout:hover {
+        background-color: #444;
+    }
+
+@media (max-width: 600px) {
+    .header-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 16px;
+    }
+
+    .logout {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+
+    .logo {
+        height: 35px;
+    }
+}

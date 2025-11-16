@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Registro de Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 0 20px;
+            background: white;
+            color: black;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: black;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1.2rem;
+            border-radius: 5px;
+            border: 1px solid black;
+            font-size: 1rem;
+            background-color: white;
+            color: black;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: red;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #a50000; /* rojo oscuro */
+            }
+
+        #msg {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: bold;
+            color: black;
+        }
+
+        .contacto {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid black;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+            .contacto h4 {
+                margin-bottom: 0.5rem;
+                color: red;
+            }
+
+            .contacto a {
+                color: black;
+                text-decoration: none;
+            }
+
+                .contacto a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+    <h2>Registro de Usuario</h2>
+    <form id="registerForm">
+        <label for="fullname">Nombre completo:</label>
+        <input type="text" id="fullname" name="fullname" required />
+
+        <label for="username">Usuario:</label>
+        <input type="text" id="username" name="username" required />
+
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" name="email" required />
+
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required />
+
+        <button type="submit">Registrarse</button>
+    </form>
+
+    <p id="msg"></p>
+
+    <div class="contacto">
+        <h4>¿Necesitas ayuda?</h4>
+        <p>📧 Correo: <a href="mailto:soporte@comercio-utp.com">soporte@comercio-utp.com</a></p>
+        <p>📞 Teléfono: <a href="tel:+51987654321">+51 987 654 321</a></p>
+        <p>💬 WhatsApp: <a href="https://wa.me/51987654321" target="_blank">Chatea con soporte</a></p>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const msg = document.getElementById('msg');
+
+        function validarPassword(password) {
+            const regex = /^(?=.*[A-Z])(?=.*\d).{10,}$/;
+            return regex.test(password);
+        }
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const fullname = form.fullname.value.trim();
+            const username = form.username.value.trim();
+            const email = form.email.value.trim();
+            const password = form.password.value;
+
+            if (!validarPassword(password)) {
+                msg.style.color = 'red';
+                msg.textContent = 'La contraseña debe tener al menos 10 caracteres, una mayúscula y un número.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullname, username, email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    msg.style.color = 'black';
+                    msg.innerHTML = 'Código enviado a tu correo. Por favor, verifica tu email.<br><br>' +
+                        '<button id="verifyRedirect">Ir a verificar código</button>';
+
+                    form.reset();
+
+                    document.getElementById('verifyRedirect').addEventListener('click', () => {
+                        window.location.href = '/verify.html';
+                    });
+                } else {
+                    msg.style.color = 'red';
+                    msg.textContent = data.message || 'Error en el registro.';
+                }
+            } catch (err) {
+                msg.style.color = 'red';
+                msg.textContent = 'Error al conectar con el servidor.';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inicio de sesión</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            background: white;
+            padding: 2rem 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #1f5f8b;
+            }
+
+        #errorMsg {
+            color: red;
+            text-align: center;
+            margin-top: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Iniciar sesión</h2>
+        <form id="loginForm">
+            <label for="username">Usuario:</label>
+            <input type="text" id="username" name="username" required />
+
+            <label for="password">Contrasena:</label>
+            <input type="password" id="password" name="password" required />
+
+            <button type="submit">Entrar</button>
+        </form>
+        <p id="errorMsg"></p>
+        <p style="text-align: center; margin-top: 1rem;">
+            ¿No tienes cuenta? <a href="/register.html">Regístrate aquí</a>
+        </p>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = form.username.value;
+            const password = form.password.value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+
+                    if (data.role === 'admin') {
+                        window.location.href = '/admin.html';
+                    } else if (data.role === 'client') {
+                        window.location.href = '/cliente.html';
+                    }
+                } else {
+                    errorMsg.textContent = data.message || "Credenciales incorrectas.";
+                }
+            } catch (error) {
+                errorMsg.textContent = "Error al conectar con el servidor.";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comercio UTP - Página Principal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #222;
+        }
+
+        #intro-video {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            #intro-video video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+            .logo-container video {
+                width: 50px;
+                height: auto;
+                margin-right: 1rem;
+            }
+
+            .logo-container h1 {
+                font-size: 1.8rem;
+                color: #fff;
+            }
+
+        .login-button {
+            background-color: #2980b9;
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+            .login-button:hover {
+                background-color: #1c5980;
+            }
+
+        section.promociones {
+            margin: 2rem auto;
+            padding: 2rem;
+            max-width: 1000px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+            section.promociones h2 {
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 2rem;
+                color: #e67e22;
+            }
+
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .promo-card {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+            .promo-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            }
+
+            .promo-card h3 {
+                font-size: 1.2rem;
+                color: #d35400;
+            }
+
+            .promo-card p {
+                font-size: 1rem;
+                color: #444;
+            }
+
+        .promo-precio {
+            margin-top: 0.5rem;
+            font-weight: bold;
+            color: #16a085;
+        }
+
+        /* Nuevo CSS para imagen en promo */
+        .promo-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;
+            background-color: #f0f0f0;
+        }
+
+            footer a {
+                color: #2980b9;
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+
+    <div id="intro-video">
+        <video src="logo.mp4" autoplay muted playsinline></video>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <video src="logo.mp4" width="50" autoplay muted loop></video>
+            <h1>Comercio UTP</h1>
+        </div>
+        <a href="/login.html" class="login-button">Iniciar sesión</a>
+    </header>
+
+    <section class="promociones">
+        <h2>🎉 Productos en Promoción</h2>
+        <div class="promo-grid"></div>
+    </section>
+
+    <footer>
+        &copy; 2025 Comercio UTP. Consulta nuestros <a href="#">términos y condiciones</a>.
+    </footer>
+
+    <script>
+        setTimeout(() => {
+            const intro = document.getElementById('intro-video');
+            intro.style.opacity = '0';
+            intro.style.transition = 'opacity 1s ease';
+            setTimeout(() => intro.remove(), 1000);
+        }, 5000);
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const promoGrid = document.querySelector('.promo-grid');
+
+        socket.on('productosActualizados', (productos) => {
+            promoGrid.innerHTML = '';
+            productos.forEach(producto => {
+                if (producto.promocion) renderPromo(producto);
+            });
+        });
+
+        socket.on('producto-agregado', (producto) => {
+            if (producto.promocion) {
+                const existe = [...promoGrid.children].some(card =>
+                    card.dataset.id === producto.id?.toString());
+                if (!existe) renderPromo(producto);
+            }
+        });
+
+        function renderPromo(producto) {
+            const div = document.createElement('div');
+            div.classList.add('promo-card');
+            if (producto.id) div.dataset.id = producto.id;
+
+            div.innerHTML = `
+                    ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}">` : ''}
+                    <h3>${producto.nombre}</h3>
+                    <p>${producto.descripcion}</p>
+                    <div class="promo-precio">S/ ${producto.precio.toFixed(2)}</div>
+                `;
+            promoGrid.appendChild(div);
+        }
+    </script>
+
+</body>
+</html>
